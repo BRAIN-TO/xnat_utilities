@@ -16,8 +16,7 @@ def infotodict(seqinfo):
     subindex: sub index within group
     """
     
-    #fieldmap different echo...
-    #add more information
+    #20221122 Yuexin Xi - bug: keyerror for extra - fixed: add key-value pair in all cases of extra
     
     #MPRAGE:
     t1w_mprage = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MPRAGE_run-{item:02d}_T1w')
@@ -33,7 +32,7 @@ def infotodict(seqinfo):
     spc_FLAIR = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_FLAIR')
     
     #BOLD:
-    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_task-{task}_dir-{dir}_run-{item:02d}_bold')
+    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_bold')
     
     #Perfusion:
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_run-{item:02d}_asl')
@@ -51,10 +50,8 @@ def infotodict(seqinfo):
     
     #extra:
     extra = create_key('{bids_subject_session_dir}/extra/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_extra')
-    localizer = create_key('{bids_subject_session_dir}/extra/{bids_subject_session_prefix}_localizer')
     
-    
-    info = {t1w_mprage: [], spc_T2w: [], spc_FLAIR: [], bold: [], asl: [], perfusion: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_diff: [], fmap_magnitude: [], extra: [], localizer: []}
+    info = {t1w_mprage: [], spc_T2w: [], spc_FLAIR: [], bold: [], asl: [], perfusion: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_diff: [], fmap_magnitude: [], extra: []}
     # last_run = len(seqinfo)
 
     for idx, s in enumerate(seqinfo):
@@ -103,10 +100,10 @@ def infotodict(seqinfo):
                     info[t1w_mp2rage].append(s.series_id)
                     continue
         
-        #spc T2w-improve later
-        if ('SPACE-T2' in s.series_description or 'space-T2' or 'T2w_SPC' in s.series_description or 'T2w_space' in s.series_description or 't2_space' in s.series_description or 't2_spc' in s.series_description or 'T2_spc' in s.series_description.strip() ): 
+        #spc T2w-improvement needed
+        if ('SPACE-T2' in s.series_description or 'space-T2' in s.series_description or 'T2w_SPC' in s.series_description or 'T2w_space' in s.series_description or 't2_space' in s.series_description or 't2_spc' in s.series_description or 'T2_spc' in s.series_description.strip() ): 
             if ('ND' in s.series_description):
-                info[extra].append({'item':s.series_id, 'acq': s.protocol.name})
+                info[extra].append({'item':s.series_id, 'acq': s.protocol_name})
                 continue
             else:
                 info[spc_T2w].append(s.series_id)
@@ -115,7 +112,7 @@ def infotodict(seqinfo):
         #spc T2w FLAIR
         if ('SPACE-FLAIR' in s.series_description): 
             if ('ND' in s.series_description):
-                info[extra].append({'item':s.series_id, 'acq': s.protocol.name})
+                info[extra].append({'item':s.series_id, 'acq': s.protocol_name})
                 continue
             else:
                 info[spc_FLAIR].append(s.series_id)
@@ -124,10 +121,10 @@ def infotodict(seqinfo):
         #BOLD
         if ('BOLD' in s.series_description) and ('FMRI' in (s.image_type[2].strip())):
             if ('PA' in (s.series_description).strip()):
-                info[bold].append({'item': s.series_id, 'task': 'rest', 'dir':'PA'})
+                info[bold].append({'item': s.series_id, 'dir':'PA'})
                 continue
             elif ('AP' in (s.series_description).strip()):
-                info[bold].append({'item': s.series_id, 'task': 'rest', 'dir':'AP'})
+                info[bold].append({'item': s.series_id, 'dir':'AP'})
                 continue
             
         #Perfusion
@@ -155,10 +152,7 @@ def infotodict(seqinfo):
                     info[dwi_TENSORB0].append(s.series_id)
                     continue     
                 
-        if ('localizer' in (s.series_description)) or ('LOCALIZER' in (s.series_description)):
-            info[localizer].append(s.series_id)
-                
-        info[extra].append({'item': s.series_id, 'acq': s.protocol.name})
+        info[extra].append({'item': s.series_id, 'acq': s.protocol_name})
     
     
         
