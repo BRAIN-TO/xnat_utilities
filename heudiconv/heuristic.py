@@ -25,8 +25,9 @@ def infotodict(seqinfo):
     #T1w:
     #t1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T1w')
     
-    #T2w:
+    #SPACE:
     spc_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_T2w')
+    spc_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_T1w')
     
     #FLAIR:
     spc_FLAIR = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_FLAIR')
@@ -51,7 +52,7 @@ def infotodict(seqinfo):
     #extra:
     extra = create_key('{bids_subject_session_dir}/extra/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_extra')
     
-    info = {t1w_mprage: [], spc_T2w: [], spc_FLAIR: [], bold: [], asl: [], perfusion: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_diff: [], fmap_magnitude: [], extra: []}
+    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], bold: [], asl: [], perfusion: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_diff: [], fmap_magnitude: [], extra: []}
     # last_run = len(seqinfo)
 
     for idx, s in enumerate(seqinfo):
@@ -80,8 +81,8 @@ def infotodict(seqinfo):
         * image_type
         """
         #Field Maps
-        if ('FIELDMAPPING' in s.protocol_name) or ('fieldmapping' in s.protocol_name):   
-            if (s.dim4 == 1) and (('GRE_FIELDMAPPING' in (s.series_description).strip()) or ('gre_fieldmapping' in (s.series_description).strip())):
+        if (('FIELDMAPPING' in s.series_description.strip().upper()) or ('FIELD_MAPPING' in s.series_description.strip().upper())):   
+            if ('GRE_FIELDMAPPING' in s.series_description.strip().upper()):
                 if('P' in (s.image_type[2].strip()) ):
                     info[fmap_diff].append(s.series_id)
                     continue
@@ -90,69 +91,65 @@ def infotodict(seqinfo):
                     continue
         
         #MPRAGE
-        if (('mprage' in s.protocol_name) or ('T1w' in s.protocol_name) or ('MPRAGE' in s.protocol_name)):
+        if (('MPRAGE' in s.series_description.strip().upper())):
                 info[t1w_mprage].append(s.series_id)
                 continue
             
         #MP2RAGE
-        if (('mp2rage' in s.protocol_name) or ('MP2RAGE' in s.protocol_name)) and (not 'memp2rage' in s.series_description):
-                if ('T1' in (s.series_description).strip()):
+        if (('MP2RAGE' in s.series_description.strip().upper()) and (not 'MEMP2RAGE' in s.series_description.strip().upper())):
+                if ('T1' in (s.series_description).strip().upper()):
                     info[t1w_mp2rage].append(s.series_id)
                     continue
         
-        #spc T2w-improvement needed
-        if ('SPACE-T2' in s.series_description or 'space-T2' in s.series_description or 'T2w_SPC' in s.series_description or 'T2w_space' in s.series_description or 't2_space' in s.series_description or 't2_spc' in s.series_description or 'T2_spc' in s.series_description.strip() ): 
-            if ('ND' in s.series_description):
-                info[extra].append({'item':s.series_id, 'acq': s.protocol_name})
-                continue
-            else:
+        #spc T2w
+        if ('SPACE' in s.series_description.strip().upper() or 'SPC' in s.series_description.strip().upper()):
+            if ('FLAIR' in s.series_description.strip().upper()):
+                if (not 'ND' in s.series_description.strip().upper()):
+                    info[spc_FLAIR].append(s.series_id)
+                else:
+                    info[extra].append({'item':s.series_id, 'acq': s.series_description})
+            if ('T2' in s.series_description.strip().upper()): 
                 info[spc_T2w].append(s.series_id)
                 continue
-        
-        #spc T2w FLAIR
-        if ('SPACE-FLAIR' in s.series_description): 
-            if ('ND' in s.series_description):
-                info[extra].append({'item':s.series_id, 'acq': s.protocol_name})
-                continue
-            else:
-                info[spc_FLAIR].append(s.series_id)
+            elif ('T1' in s.series_description.strip().upper()):
+                info[spc_T1w].append(s.series_id)
                 continue
         
         #BOLD
-        if ('BOLD' in s.series_description) and ('FMRI' in (s.image_type[2].strip())):
-            if ('PA' in (s.series_description).strip()):
+        if (('BOLD' in s.series_description.strip().upper()) and ('FMRI' in s.image_type[2].strip())):
+            if ('PA' in s.series_description.strip().upper()):
                 info[bold].append({'item': s.series_id, 'dir':'PA'})
                 continue
-            elif ('AP' in (s.series_description).strip()):
+            elif ('AP' in s.series_description.strip().upper()):
                 info[bold].append({'item': s.series_id, 'dir':'AP'})
                 continue
             
         #Perfusion
-        if ('ASL' in (s.image_type[2].strip())):
-            if ('ORIGINAL' in (s.image_type[0].strip())):
+        if ('ASL' in s.image_type[2].strip()):
+            if ('ORIGINAL' in s.image_type[0].strip()):
                 info[asl].append(s.series_id)
                 continue
-            elif ('DERIVED' in (s.image_type[0].strip())) and ('SUBTRACTION' in (s.image_type[3].strip())):
+            elif (('DERIVED' in s.image_type[0].strip()) and ('SUBTRACTION' in s.image_type[3].strip())):
                 info[perfusion].append(s.series_id)
                 continue
         
         #dwi
-        if ('DIFFUSION' in (s.image_type[2].strip())) or ('DTI'in (s.series_description).strip()) or ('DWI' in (s.series_description).strip()):
-            if ('ORIGINAL' in (s.image_type[0].strip())):
+        if (('DIFFUSION' in s.image_type[2].strip()) or ('DTI'in s.series_description.strip().upper()) or ('DWI' in (s.series_description).strip().upper())):
+            if ('ORIGINAL' in s.image_type[0].strip()):
                 info[dwi].append(s.series_id)
                 continue
-            elif ('DERIVED' in (s.image_type[0].strip())):
-                if ('FA' in (s.image_type[3].strip())):
+            elif ('DERIVED' in s.image_type[0].strip()):
+                if ('FA' in s.image_type[3].strip()):
                     info[dwi_FA].append(s.series_id)
                     continue
-                elif ('TENSOR' in (s.image_type[3].strip())):
-                    info[dwi_TENSOR].append(s.series_id)
-                    continue
-                elif ('TENSOR_B0' in (s.image_type[3].strip())):
+                elif ('TENSOR_B0' in s.image_type[3].strip()):
                     info[dwi_TENSORB0].append(s.series_id)
-                    continue     
+                    continue  
+                elif ('TENSOR' in s.image_type[3].strip()):
+                    info[dwi_TENSOR].append(s.series_id)
+                    continue   
                 
-        info[extra].append({'item': s.series_id, 'acq': s.protocol_name})
+        info[extra].append({'item': s.series_id, 'acq': s.series_description})
     
     
         
