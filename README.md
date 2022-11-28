@@ -3,7 +3,7 @@ Code base for XNAT applications
 
 ## Installation/Prerequisite
 1. Docker engine (installation for [ubuntu](https://github.com/srikash/TheBeesKnees/wiki/Installing-Docker-on-Ubuntu) or official installation documentation [here](https://docs.docker.com/engine/install/))
-2. Data are organized in sub-xx folders.
+2. Data are organized in sub-## folders (e.g., sub-01, sub-02...).
 
 ## BIDScoin
 https://github.com/srikash/TheBeesKnees/wiki/Converting-DICOMs-to-BIDS-NIfTIs
@@ -12,9 +12,18 @@ https://github.com/srikash/TheBeesKnees/wiki/Converting-DICOMs-to-BIDS-NIfTIs
 
 ## HeuDiConv
 https://heudiconv.readthedocs.io/en/latest/
+
+Method1:
 1. Type `docker pull nipy/heudiconv:latest` in terminal to install HeuDiConv
-2. Get a heuristic file (also available in /heudiconv) that is compatible with your dicoms
+2. Get a converter file (also available in ./heudiconv/) that is compatible with your dicoms
 3. For a single subject: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest -d <base_dir/dicoms_dir>/sub-{subject}/*/*.dcm -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/heuristic.py -s 01 -c dcm2niix -b --overwrite --minmeta`*
+
+Method2 for a single subject:
+1. Type `docker pull nipy/heudiconv:latest` in terminal to install HeuDiConv
+2. Get the heudiconv_test.sh in this directory and a converter file(also available in ./heudiconv).
+3. Put the script in the parent directory (base) of your dicom directory (and bids directory if exists). Put the converter under the base directory.
+4. When you are in the base directory, run heudiconv_test.sh with four arguments: path to converter file, name of dicom directory, name of bids directory and subject number (e.g., 01)
+
 
 *Optional session flag `-ss` is available.
 

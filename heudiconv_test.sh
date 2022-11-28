@@ -11,7 +11,7 @@ if [ $# -lt 4 ]
     echo "e.g., ./heudiconv_test.sh xnat_utilities/heudiconv/heuristic.py Yuexin_DICOM2 Yuexin_BIDS2 01"
     echo "Prerequisites:"
     echo "Docker and heudiconv are installed"
-    echo "You are in a parent directory of the dicom directory (and bids directory if exists)"
+    echo "You should be in the parent directory of the dicom directory (and bids directory if exists)"
     echo "The converter file is in this curent directory or sub-directories"
     exit 1
 fi
