@@ -30,7 +30,8 @@ Method2 for a single subject:
 
 * Relative path from a base directory rather than absolute path is highly recommended.
 
-Note: BIDScoin is recommended rather than HeuDiConv (below) if derived images (e.g. ADC, TRACE...) are contained in the dataset.
+Method3 with dockerfile to deal with derived images and more reliable classification: 
+- In Progress
 
 ## MRIQC
 https://mriqc.readthedocs.io/en/latest/

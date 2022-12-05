@@ -81,6 +81,8 @@ def infotodict(seqinfo):
         * series_description
         * image_type
         """
+        
+        
         #Field Maps '*fl2d2'
         if (('FIELDMAPPING' in s.protocol_name.strip().upper()) or ('FIELD_MAPPING' in s.protocol_name.strip().upper())):   
             if ('GRE_FIELDMAPPING' in s.protocol_name.strip().upper()):
