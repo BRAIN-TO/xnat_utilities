@@ -6,11 +6,12 @@ Instructions are based on Ubuntu 20.04.5 LTS
 ## Installation/Prerequisite
 1. Docker engine (installation for [ubuntu](https://github.com/srikash/TheBeesKnees/wiki/Installing-Docker-on-Ubuntu) or official installation documentation [here](https://docs.docker.com/engine/install/))
 2. Data are organized in sub-## folders (e.g., sub-01, sub-02...)
+3. Virual environment recommended.
 
 ## BIDScoin
 https://github.com/srikash/TheBeesKnees/wiki/Converting-DICOMs-to-BIDS-NIfTIs*
 
-* `qtcreator` may be required for opening the GUI on ubuntu.
+\* `qtcreator` may be required for opening the GUI on ubuntu.
 
 ## HeuDiConv
 https://heudiconv.readthedocs.io/en/latest/
@@ -26,9 +27,9 @@ Method2 for a single subject:
 3. Put the script in the parent directory (base) of your dicom directory (and bids directory if exists). Put the converter under the base directory.
 4. When you are in the base directory, run heudiconv_test.sh with four arguments: relative path to converter file, name of dicom directory, name of bids directory and subject number (e.g., 01)
 
-* Optional session flag `-ss` is available.
+\* Optional session flag `-ss` is available.
 
-* Relative path from a base directory rather than absolute path is highly recommended.
+\* Relative path from a base directory rather than absolute path is highly recommended.
 
 Method3 with dockerfile to deal with derived images and more reliable classification: 
 - In Progress
