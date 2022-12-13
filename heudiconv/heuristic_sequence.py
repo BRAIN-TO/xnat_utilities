@@ -18,51 +18,55 @@ def infotodict(seqinfo):
     
     #20221122 Yuexin Xi - bug: keyerror for extra - fixed: add key-value pair in all cases of extra
     
-    #MPRAGE:
+    # MPRAGE
     t1w_mprage = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MPRAGE_run-{item:02d}_T1w')
     t1w_mp2rage = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MP2RAGE_run-{item:02d}_T1w')
     
-    #T1w:
+    #T1w
     #t1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T1w')
     
-    #SPACE:
+    # SPACE
     spc_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_T2w')
     spc_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_T1w')
     spc_FLAIR = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_FLAIR')
     
-    #FLAIR:
+    # FLAIR
     flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
     
-    #BOLD:
+    # BOLD
     bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_bold')
     
-    #Perfusion:
+    # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_run-{item:02d}_asl')
     perfusion = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_perfusion')
     dce = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dce')
     dsc = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dsc')
     
-    #Diffusion:
+    # Diffusion
     dwi = create_key('{bids_subject_session_dir}/dwi/{bids_subject_session_prefix}_run-{item:02d}_dwi')
     dwi_FA = create_key('{bids_subject_session_dir}/extra/dwi/{bids_subject_session_prefix}_run-{item:02d}_FA')
     dwi_TENSOR = create_key('{bids_subject_session_dir}/extra/dwi/{bids_subject_session_prefix}_run-{item:02d}_TENSOR')
     dwi_TENSORB0 = create_key('{bids_subject_session_dir}/extra/dwi/{bids_subject_session_prefix}_run-{item:02d}_TENSORB0')
     
-    #Field Maps:
+    # Field Maps
+    # fm2d2r
     fmap_diff = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_part-phase_MEGRE')
     fmap_magnitude = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_part-mag_MEGRE')
     
-    # MEGRE 
-        # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images -> check results whether it says 1 and 2
-        # fl2d2 - fieldmap in names -> anat/..._MEGRE.nii
+    # MEGRE
+    # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images -> check results whether it says 1 and 2
+    # fl2d2 - fieldmap in names -> anat/..._MEGRE.nii
+    fmap_megre_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_magnitude')
+    fmap_megre_phase = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_phase')
+    megre = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_MEGRE')
     
     #Angiography
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
     
-    #extra:
+    #extra
     extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_extra')
     
-    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], asl: [], perfusion: [], dce: [], dsc: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
+    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], asl: [], perfusion: [], dce: [], dsc: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
     # last_run = len(seqinfo)
 
     for idx, s in enumerate(seqinfo):
@@ -91,7 +95,7 @@ def infotodict(seqinfo):
         * image_type
         """
         
-        #Field Maps?
+        #Field Maps needs verification
         if ('fm2d2r' in s.sequence_name):
             if('P' in (s.image_type[2].strip()) ):
                     info[fmap_diff].append(s.series_id)
@@ -100,12 +104,25 @@ def infotodict(seqinfo):
                     info[fmap_magnitude].append(s.series_id)
                     continue
 
-        #MPRAGE (1 image) + MP2RAGE(3 images)
+        #MEGRE
+        if ('fl2d2' in s.sequence_name):
+            if ('FIELD' in s.series_description.strip().upper() and 'MAP' in s.series_description.strip().upper()):
+                if('P' in (s.image_type[2].strip())):
+                    info[fmap_megre_phase].append(s.series_id)
+                    continue
+                elif ('M' in (s.image_type[2].strip())):
+                    info[fmap_megre_magnitude].append(s.series_id)
+                    continue
+            if (not ('FIELD' in s.series_description.strip().upper()) and not ('MAP' in s.series_description.strip().upper())):
+                info[megre].append(s.series_id)
+                continue
+        
+        #MPRAGE (1 image) + MP2RAGE (3 images)
         if ('tfl3d1_16ns' in s.sequence_name):
             info[t1w_mprage].append(s.series_id)
             continue 
         
-        #SPACE maybe "spc"
+        #SPACE needs verification
         if ('spc' in s.sequence_name):
             if ('spcir_248ns' in s.sequence_name):
                 info[spc_FLAIR].append(s.series_id)

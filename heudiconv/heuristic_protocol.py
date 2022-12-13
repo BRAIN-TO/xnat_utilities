@@ -1,5 +1,7 @@
 import os
 
+#20221122 Yuexin Xi - bug: keyerror for extra - fixed: add key-value pair in all cases of extra
+
 def create_key(template, outtype=('nii.gz',), annotation_classes=None):
     if template is None or not template:
         raise ValueError('Template must be a valid format string')
@@ -15,8 +17,7 @@ def infotodict(seqinfo):
     seqitem: run number during scanning
     subindex: sub index within group
     """
-    
-    #20221122 Yuexin Xi - bug: keyerror for extra - fixed: add key-value pair in all cases of extra
+
     
     #MPRAGE:
     t1w_mprage = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MPRAGE_run-{item:02d}_T1w')
@@ -55,13 +56,20 @@ def infotodict(seqinfo):
     fmap_diff = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_part-phase_MEGRE')
     fmap_magnitude = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_part-mag_MEGRE')
     
+    # MEGRE
+    # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images -> check results whether it says 1 and 2
+    # fl2d2 - fieldmap in names -> anat/..._MEGRE.nii
+    fmap_megre_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_run-{item:02d}_magnitude')
+    fmap_megre_phase = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_run-{item:02d}_phase')
+    megre = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_MEGRE')
+    
     #Angiography
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
     
     #extra:
     extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_extra')
     
-    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], tse: [], bold: [], asl: [], perfusion: [], dce: [], dsc: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
+    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], tse: [], bold: [], asl: [], perfusion: [], dce: [], dsc: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
     # last_run = len(seqinfo)
 
     for idx, s in enumerate(seqinfo):
@@ -91,7 +99,7 @@ def infotodict(seqinfo):
         """
         
         #Angiography
-        if ('ANGIO' in s.series_description().strip().upper()):
+        if ('ANGIO' in s.series_description.strip().upper()):
             info[angio].append(s.series_id)
             continue
         
@@ -99,10 +107,10 @@ def infotodict(seqinfo):
         if (('FIELDMAPPING' in s.series_description.strip().upper()) or ('FIELD_MAPPING' in s.series_description.strip().upper())):   
             if ('GRE_FIELDMAPPING' in s.series_description.strip().upper()):
                 if('P' in (s.image_type[2].strip()) ):
-                    info[fmap_diff].append(s.series_id)
+                    info[fmap_megre_phase].append(s.series_id)
                     continue
                 if('M' in (s.image_type[2].strip()) ):
-                    info[fmap_magnitude].append(s.series_id)
+                    info[fmap_megre_magnitude].append(s.series_id)
                     continue
         
         #MPRAGE
@@ -147,7 +155,7 @@ def infotodict(seqinfo):
                 continue
             
         #Perfusion
-        if ('ASL' in s.image_type[2].strip() or 'perf' in s.series_description.strip().upp):
+        if ('ASL' in s.image_type[2].strip() or 'PERF' in s.series_description.strip().upper()):
             if ('ORIGINAL' in s.image_type[0].strip()):
                 info[asl].append(s.series_id)
                 continue
