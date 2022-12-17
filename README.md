@@ -18,7 +18,7 @@ https://heudiconv.readthedocs.io/en/latest/
 
 To Get heudiconv (choose one):
 1. Latest official heudiconv: Type `docker pull nipy/heudiconv:latest` in terminal
-2. [Modified version](https://github.com/845127818virna/heudiconv): Clone the repository and use the dockerfile in it to build a docker image. This version allows derived images. Remember to replace `nipy/heudiconv:latest` with the image you built.
+2. Modified version: Clone [this repository]((https://github.com/845127818virna/heudiconv)) and use the dockerfile in it to build a docker image. This version allows derived images. Remember to replace `nipy/heudiconv:latest` with the image you built.
 
 Method1:
 1. Get a converter file (also available in ./heudiconv/) that is compatible with your dicoms
@@ -35,7 +35,7 @@ Method2 for a single subject:
 
 ### heuristic file provided by us
 - heuristic_protocol.py: classification based on series description.
-- heuristic_sequence.py: classification based on sequence name
+- heuristic_sequence.py: classification based on sequence name.
 
 
 ## MRIQC
@@ -43,7 +43,3 @@ https://mriqc.readthedocs.io/en/latest/
 1. Data have to be in BIDS. You can validate your data with the [validator](http://incf.github.io/bids-validator/). Some valid key labels may not be accepted by the validator but will not affect the overall performance of MRIQC.
 2. To see whether mriqc works properly, use `docker run -it nipreps/mriqc:latest --version` to check the version
 3. For a single subject: `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out nipreps/mriqc:latest /data /out participant --participant_label <subject_folder_name>`
-
-
-
-

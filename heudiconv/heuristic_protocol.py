@@ -95,7 +95,9 @@ def infotodict(seqinfo):
         * study_description
         * referring_physician_name
         * series_description
+        * series_files
         * image_type
+        * sequence_name
         """
         
         #Angiography
