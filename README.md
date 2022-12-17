@@ -18,7 +18,7 @@ https://heudiconv.readthedocs.io/en/latest/
 
 To Get heudiconv (choose one):
 1. Latest official heudiconv: Type `docker pull nipy/heudiconv:latest` in terminal
-2. Modified version: Clone [this repository]((https://github.com/845127818virna/heudiconv)) and use the dockerfile in it to build a docker image. This version allows derived images. Remember to replace `nipy/heudiconv:latest` with the image you built.
+2. Modified version: Clone [this repository](https://github.com/845127818virna/heudiconv) and use the dockerfile in it to build a docker image. This version allows derived images. Remember to replace `nipy/heudiconv:latest` with the image you built.
 
 Method1:
 1. Get a converter file (also available in ./heudiconv/) that is compatible with your dicoms
