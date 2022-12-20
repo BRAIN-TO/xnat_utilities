@@ -19,8 +19,14 @@ def infotodict(seqinfo):
     #20221122 Yuexin Xi - bug: keyerror for extra - fixed: add key-value pair in all cases of extra
     
     # MPRAGE
-    t1w_mprage = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MPRAGE_run-{item:02d}_T1w')
-    t1w_mp2rage = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MP2RAGE_run-{item:02d}_T1w')
+    mprage_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MPRAGE_run-{item:02d}_T1w')
+    mp2rage_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-MP2RAGE_run-{item:02d}_T1w')
+    
+    # FGATIR
+    fgatir_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-FGATIR_run-{item:02d}_T1w')
+    edge3d_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-3DEDGE_run-{item:02d}_T1w')
+    wair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-WAIR_run-{item:02d}_T1w')
+    stir = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-STIR_run-{item:02d}_T1w')
     
     #T1w
     #t1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T1w')
@@ -67,9 +73,9 @@ def infotodict(seqinfo):
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
     
     #extra
-    extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_extra')
+    extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_{des}_run-{item:02d}_extra')
     
-    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], bold_ref: [], asl: [], perfusion: [], dce: [], dsc: [], rcbf: [], m0scan: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
+    info = {mprage_T1w: [], mp2rage_T1w: [], fgatir_T1w: [], edge3d_T1w: [], wair: [], stir: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], bold_ref: [], asl: [], perfusion: [], dce: [], dsc: [], rcbf: [], m0scan: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
     # last_run = len(seqinfo)
 
     for idx, s in enumerate(seqinfo):
@@ -128,8 +134,29 @@ def infotodict(seqinfo):
         
         #MPRAGE (1 image) + MP2RAGE (3 images)
         if ('tfl3d1_16ns' in s.sequence_name):
-            info[t1w_mprage].append(s.series_id)
-            continue 
+            if (s.series_files == 1):
+                info[mprage_T1w].append(s.series_id)
+                continue
+            elif (s.series_files > 1):
+                info[mp2rage_T1w].append(s.series_id)
+                continue 
+        
+        #FGATIR, 3d-EDGE, WAIR, STIR       
+        if ('tfl3d1_16' in s.sequence_name):
+            if ('FGATIR' in s.series_description.strip().upper()):
+                info[fgatir_T1w].append(s.series_id)
+                continue
+            if ('3D-EDGE' in s.series_description.strip().upper()):
+                info[edge3d_T1w].append(s.series_id)
+                continue
+                
+        if ('tir2d1_7' in s.sequence_name):
+            info[wair].append(s.series_id)
+            continue
+        
+        if ('tir2d1rr15' in s.sequence_name):
+            info[stir].append(s.series_id)
+            continue
         
         #SPACE needs verification
         if ('spc' in s.sequence_name):
@@ -151,6 +178,7 @@ def infotodict(seqinfo):
             ('epse2d1_110' in s.sequence_name and 'BOLD' in s.series_description.strip().upper())):
             if ('SBREF' in s.series_description.strip().upper()):
                 info[bold_ref].append({'item': s.series_id})
+                continue
             elif ('PA' in s.series_description.strip().upper()):
                 info[bold].append({'item': s.series_id, 'dir':'PA'})
                 continue
@@ -202,19 +230,17 @@ def infotodict(seqinfo):
             info[angio].append(s.series_id)
             continue
         
-        info[extra].append({'item': s.series_id, 'acq': s.sequence_name})
+        info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
                   
         
         """
-        #Angiography
-        if ('ANGIO' in s.series_description().strip().upper()):
-            info[angio].append(s.series_id)
-            continue
+        #hippocampus
+        if ('tse2d1_15' in s.sequence_name):
         
         #MP2RAGE
         if (('MP2RAGE' in s.series_description.strip().upper()) and (not 'MEMP2RAGE' in s.series_description.strip().upper())):
                 if ('T1' in (s.series_description).strip().upper()):
-                    info[t1w_mp2rage].append(s.series_id)
+                    info[mp2rage_T1w].append(s.series_id)
                     continue
             
         # FLAIR
