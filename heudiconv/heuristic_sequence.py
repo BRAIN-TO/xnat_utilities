@@ -35,12 +35,15 @@ def infotodict(seqinfo):
     
     # BOLD
     bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_bold')
+    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_run-{item:02d}_sbref')
     
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_run-{item:02d}_asl')
     perfusion = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_perfusion')
     dce = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dce')
     dsc = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dsc')
+    rcbf = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_cbf')
+    m0scan = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_m0scan')
     
     # Diffusion
     dwi = create_key('{bids_subject_session_dir}/dwi/{bids_subject_session_prefix}_run-{item:02d}_dwi')
@@ -58,7 +61,7 @@ def infotodict(seqinfo):
     # fl2d2 - fieldmap in names -> anat/..._MEGRE.nii
     fmap_megre_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_magnitude')
     fmap_megre_phase = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_phase')
-    megre = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_MEGRE')
+    megre = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_MEGRE')
     
     #Angiography
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
@@ -66,7 +69,7 @@ def infotodict(seqinfo):
     #extra
     extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_extra')
     
-    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], asl: [], perfusion: [], dce: [], dsc: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
+    info = {t1w_mprage: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], bold_ref: [], asl: [], perfusion: [], dce: [], dsc: [], rcbf: [], m0scan: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
     # last_run = len(seqinfo)
 
     for idx, s in enumerate(seqinfo):
@@ -109,8 +112,10 @@ def infotodict(seqinfo):
                     continue
 
         #MEGRE
-        if ('fl2d2' in s.sequence_name):
-            if ('FIELD' in s.series_description.strip().upper() and 'MAP' in s.series_description.strip().upper()):
+        if ('fl2d2' in s.sequence_name or \
+            'qfl3d4' in s.sequence_name):
+            if ('FIELD' in s.series_description.strip().upper() \
+                and 'MAP' in s.series_description.strip().upper()):
                 if('P' in (s.image_type[2].strip())):
                     info[fmap_megre_phase].append(s.series_id)
                     continue
@@ -140,25 +145,44 @@ def infotodict(seqinfo):
                     continue  
         
         #BOLD
-        if ('epfid2d1_92' in s.sequence_name or ('FMRI' in s.image_type[2].strip())):
-            if ('PA' in s.series_description.strip().upper()):
+        if ('epfid2d1_92' in s.sequence_name or \
+            'epfid2d1_110' in s.sequence_name or \
+            'epfid2d3_88' in s.sequence_name or \
+            ('epse2d1_110' in s.sequence_name and 'BOLD' in s.series_description.strip().upper())):
+            if ('SBREF' in s.series_description.strip().upper()):
+                info[bold_ref].append({'item': s.series_id})
+            elif ('PA' in s.series_description.strip().upper()):
                 info[bold].append({'item': s.series_id, 'dir':'PA'})
                 continue
             elif ('AP' in s.series_description.strip().upper()):
                 info[bold].append({'item': s.series_id, 'dir':'AP'})
                 continue
-            
+                        
         #Perfusion
-        if ('ASL' in s.image_type[2].strip() or 'tgse3d1_3100' in s.sequence_name):
+        if ('ASL' in s.image_type[2].strip() or \
+            'tgse3d1_3100' in s.sequence_name or \
+            'WIPtgse3d1_2184' in s.sequence_name):
             if ('ORIGINAL' in s.image_type[0].strip()):
-                info[asl].append(s.series_id)
-                continue
+                if ('MZERO' in s.series_description.strip().upper() or 'M0' in s.series_description.strip().upper()):
+                    if ('PA' in s.series_description.strip().upper()):
+                        info[m0scan].append({'item': s.series_id, 'dir':'PA'})
+                        continue
+                    elif ('AP' in s.series_description.strip().upper()):
+                        info[m0scan].append({'item': s.series_id, 'dir':'AP'})
+                        continue
+                else:
+                    info[asl].append(s.series_id)
+                    continue
             elif (('DERIVED' in s.image_type[0].strip()) and ('SUBTRACTION' in s.image_type[3].strip())):
                 info[perfusion].append(s.series_id)
                 continue
+            elif (('DERIVED' in s.image_type[0].strip()) and ('RCBF' in s.image_type[3].strip())):
+                info[rcbf].append(s.series_id)
             
         #Diffusion
-        if (('DIFFUSION' in s.image_type[2].strip()) or 'epse2d1_110' in s.sequence_name):
+        if ('DIFFUSION' in s.image_type[2].strip() or \
+            'epse2d1_122' in s.sequence_name or \
+            ('espe2d1_110' in s.sequence_name and 'DWI' in s.series_description.strip().upper())):
             if ('ORIGINAL' in s.image_type[0].strip()):
                 info[dwi].append(s.series_id)
                 continue
@@ -173,7 +197,12 @@ def infotodict(seqinfo):
                     info[dwi_TENSOR].append(s.series_id)
                     continue  
         
-        info[extra].append({'item': s.series_id, 'acq': s.series_description})
+        #Angiography
+        if ('fl3d1r' in s.sequence_name):
+            info[angio].append(s.series_id)
+            continue
+        
+        info[extra].append({'item': s.series_id, 'acq': s.sequence_name})
                   
         
         """

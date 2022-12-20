@@ -5,7 +5,7 @@ Instructions are based on Ubuntu 20.04.5 LTS
 
 ## Prerequisite
 1. Docker engine (installation for [ubuntu](https://github.com/srikash/TheBeesKnees/wiki/Installing-Docker-on-Ubuntu) or official installation documentation [here](https://docs.docker.com/engine/install/))
-2. Data are organized in sub-## folders (e.g., sub-01, sub-02...)
+2. All dicoms are organized in sub-## folders (e.g., sub-01, sub-02...). No subfolders under each subject folder.
 3. Virtual environment recommended.
 
 ## BIDScoin
@@ -18,11 +18,11 @@ https://heudiconv.readthedocs.io/en/latest/
 
 To Get heudiconv (choose one):
 1. Latest official heudiconv: Type `docker pull nipy/heudiconv:latest` in terminal
-2. Modified version: Clone [this repository](https://github.com/845127818virna/heudiconv) and use the dockerfile in it to build a docker image. This version allows derived images. Remember to replace `nipy/heudiconv:latest` with the image you built.
+2. Modified version: Clone [this repository](https://github.com/845127818virna/heudiconv) and use the dockerfile in it to build a docker image. This version allows derived images. Remember to replace `nipy/heudiconv:latest` with the image you built in the command or heudiconv_test.sh.
 
 Method1:
 1. Get a converter file (also available in ./heudiconv/) that is compatible with your dicoms
-2. For a single subject: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest -d <base_dir/dicoms_dir>/sub-{subject}/*/*.dcm -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`*
+2. For a single subject: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest -d <base_dir/dicoms_dir>/sub-{subject}/*.dcm -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`*
 
 \* Optional session flag `-ss` is available.
 
