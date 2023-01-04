@@ -41,7 +41,7 @@ def infotodict(seqinfo):
     
     # BOLD
     bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_bold')
-    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_run-{item:02d}_sbref')
+    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_sbref')
     
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_asl')
@@ -72,11 +72,12 @@ def infotodict(seqinfo):
     
     #Angiography
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
+    angio_MIP = create_key('{bids_subject_session_dir}/extra/anat/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_MIP')
     
     #extra
     extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_{des}_run-{item:02d}_extra')
     
-    info = {mprage_T1w: [], mp2rage_T1w: [], fgatir_T1w: [], edge3d_T1w: [], wair: [], stir: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], bold_ref: [], asl: [], perfusion: [], dce: [], dsc: [], rcbf: [], m0scan: [], bat: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], extra: []}
+    info = {mprage_T1w: [], mp2rage_T1w: [], fgatir_T1w: [], edge3d_T1w: [], wair: [], stir: [], spc_T2w: [], spc_T1w: [], spc_FLAIR: [], flair: [], bold: [], bold_ref: [], asl: [], perfusion: [], dce: [], dsc: [], rcbf: [], m0scan: [], bat: [], dwi: [], dwi_FA: [], dwi_TENSOR: [], dwi_TENSORB0: [], fmap_megre_magnitude: [], fmap_megre_phase: [], megre: [], fmap_diff: [], fmap_magnitude: [], angio: [], angio_MIP: [], extra: []}
     # last_run = len(seqinfo)
 
     for idx, s in enumerate(seqinfo):
@@ -134,23 +135,22 @@ def infotodict(seqinfo):
                 continue
         
         #MPRAGE (1 image) + MP2RAGE (3 images)
-        if ('tfl3d1_16ns' in s.sequence_name):
-            if (s.series_files == 1):
+        #FGATIR, 3d-EDGE, WAIR, STIR
+        if ('tfl3d1' in s.sequence_name):
+            if ('FGATIR' in s.series_description.strip().upper()):
+                info[fgatir_T1w].append(s.series_id)
+                continue
+            elif ('3D-EDGE' in s.series_description.strip().upper()):
+                info[edge3d_T1w].append(s.series_id)
+                continue
+            elif (s.series_files == 1):
                 info[mprage_T1w].append(s.series_id)
                 continue
             elif (s.series_files == 3):
                 info[mp2rage_T1w].append(s.series_id)
-                continue 
-        
-        #FGATIR, 3d-EDGE, WAIR, STIR       
-        if ('tfl3d1_16' in s.sequence_name):
-            if ('FGATIR' in s.series_description.strip().upper()):
-                info[fgatir_T1w].append(s.series_id)
                 continue
-            if ('3D-EDGE' in s.series_description.strip().upper()):
-                info[edge3d_T1w].append(s.series_id)
-                continue
-                
+            
+          
         if ('tir2d1_7' in s.sequence_name):
             info[wair].append(s.series_id)
             continue
@@ -176,13 +176,23 @@ def infotodict(seqinfo):
         if (('epfid2d' in s.sequence_name or 
             'epse2d' in s.sequence_name) and 'FMRI' in s.image_type[2].strip()):
             if ('SBREF' in s.series_description.strip().upper()):
-                info[bold_ref].append({'item': s.series_id})
-                continue
-            elif ('PA' in s.series_description.strip().upper()):
+                if ('PA' in s.series_description.strip().upper()):
+                    info[bold_ref].append({'item': s.series_id, 'dir':'PA'})
+                    continue
+                elif ('AP' in s.series_description.strip().upper()):
+                    info[bold_ref].append({'item': s.series_id, 'dir':'AP'})
+                    continue
+                else:
+                    info[bold_ref].append({'item': s.series_id, 'dir':'none'})
+                    continue
+            if ('PA' in s.series_description.strip().upper()):
                 info[bold].append({'item': s.series_id, 'dir':'PA'})
                 continue
             elif ('AP' in s.series_description.strip().upper()):
                 info[bold].append({'item': s.series_id, 'dir':'AP'})
+                continue
+            else:
+                info[bold].append({'item': s.series_id, 'dir':'none'})
                 continue
                         
         #Perfusion
@@ -218,8 +228,7 @@ def infotodict(seqinfo):
             
         #Diffusion
         if ('DIFFUSION' in s.image_type[2].strip() or \
-            'epse2d1_122' in s.sequence_name or \
-            ('espe2d1_110' in s.sequence_name and 'DWI' in s.series_description.strip().upper())):
+            ('epse2d' in s.sequence_name and 'DWI' in s.series_description.strip().upper())):
             if ('ORIGINAL' in s.image_type[0].strip()):
                 info[dwi].append(s.series_id)
                 continue
@@ -236,9 +245,18 @@ def infotodict(seqinfo):
         
         #Angiography
         if ('fl3d1r' in s.sequence_name):
-            info[angio].append(s.series_id)
-            continue
-        
+            if ('ORIGINAL' in s.image_type[0].strip()):
+                info[angio].append(s.series_id)
+                continue
+            elif ('DERIVED' in s.image_type[0].strip()):
+                if ('MIP' in s.series_description.strip().upper()):
+                    if ('COR' in s.series_description.strip().upper()):
+                        info[angio_MIP].append({'item': s.series_id, 'acq': 'coronal'})
+                        continue
+                    if ('SAG' in s.series_description.strip().upper()):
+                        info[angio_MIP].append({'item': s.series_id, 'acq': 'sagittal'})
+                        continue
+                    
         info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
                   
         
