@@ -6,7 +6,7 @@ Remember to change everything with <> below according to your own directory stru
 
 ## Prerequisite
 1. Docker engine (installation for [ubuntu](https://github.com/srikash/TheBeesKnees/wiki/Installing-Docker-on-Ubuntu) or official installation documentation [here](https://docs.docker.com/engine/install/))
-2. All dicoms are organized in sub-## folders (e.g., sub-01, sub-02...). No subfolders under each subject folder.
+2. All dicoms are organized in sub-## folders (e.g., sub-01, sub-02...) in the project folder. No subfolders under each subject folder.
 3. Virtual environment recommended.
 
 ## BIDScoin
@@ -18,9 +18,9 @@ https://github.com/srikash/TheBeesKnees/wiki/Converting-DICOMs-to-BIDS-NIfTIs*
 https://heudiconv.readthedocs.io/en/latest/
 
 ### To get heudiconv (choose one):
-1. Latest official heudiconv: Type `docker pull nipy/heudiconv:latest` in terminal
+1. Latest official heudiconv: run `docker pull nipy/heudiconv:latest` in terminal
 2. Our modified version:
-    Clone [this repository](https://github.com/845127818virna/heudiconv). Go into the cloned folder, use `docker build -t heudiconv .` to build a docker image.
+    Clone [this repository](https://github.com/845127818virna/heudiconv). Go into the cloned folder, use `docker build -t heudiconv .` to build a docker image called "heudiconv".
 
 Method1 for a single subject:
 1. Get a converter file (available in ./heudiconv/)
@@ -29,16 +29,16 @@ a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nip
 b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv -d <base_dir/dicoms_dir>/sub-{subject}/*.dcm -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
 
 \* Relative path from a base directory rather than absolute path is highly recommended. \
-\* If you need to run heudiconv on the same data again, remove the existing BIDS folder first.
+\* If you need to run heudiconv on the same data again, remove the existing output folder first.
 
-Method2 for a single subject using our version:
-1. Get the heudiconv_test.sh and a converter file (available in ./heudiconv/)
-2. Put the script in the parent directory (base_dir) of your dicom directory (and bids directory if exists). Put the converter in the base directory.
-3. When you are in the base directory, run heudiconv_test.sh with four arguments: relative path to converter file, name of dicom directory, name of bids directory and subject index (e.g., 01)
+Method2 for a single subject using our version: (easier to use but less freedom)
+1. Get the heudiconv_test.sh from this repository and a converter file (available in ./heudiconv/)
+2. Put heudiconv_test.sh and the converter file in a base directory (base_dir). This base directory should be the parent directory of your project's dicom directory.
+3. When you are in the base directory, use `chmod u+x heudiconv_test.sh` to make the script executable. Then you can run heudiconv_test.sh with three arguments: the name of the dicom directory, the name of the converter file and the subject index (e.g., `./heudiconv_test.sh Yuexin_project heuristic_sequence.py 01`). The output will be in the base directory (e.g. ./Yuexin_project_BIDS)
 
 ### heuristic file provided by us
 - heuristic_protocol.py: classification based on series description.
-- heuristic_sequence.py: classification based on sequence name.
+- heuristic_sequence.py: more complete classification based on sequence name.
 
 
 ## MRIQC
