@@ -20,7 +20,7 @@ converter=${2}
 isubject=${3}
 
 # Must remove existing .heudiconv/ before another execution
-sudo rm -rf ./${dicom_dir}_BIDS/sub-01
+sudo rm -rf ./${dicom_dir}_BIDS/sub-${isubject}
 sudo rm -rf ./${dicom_dir}_BIDS/.heudiconv/
 
 : '

@@ -43,8 +43,8 @@ def infotodict(seqinfo):
     #Perfusion:
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_run-{item:02d}_asl')
     perfusion = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_perfusion')
-    dce = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dce')
     dsc = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dsc')
+    dce = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dce')
     
     #Diffusion:
     dwi = create_key('{bids_subject_session_dir}/dwi/{bids_subject_session_prefix}_run-{item:02d}_dwi')

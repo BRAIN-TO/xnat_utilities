@@ -40,16 +40,16 @@ def infotodict(seqinfo):
     flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
     
     # BOLD
-    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_bold')
-    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_sbref')
+    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_bold')
+    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_sbref')
     
     # Perfusion
-    asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_asl')
+    asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_asl')
     perfusion = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_perfusion')
     dce = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dce')
     dsc = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_dsc')
     rcbf = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_cbf')
-    m0scan = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_dir-{dir}_run-{item:02d}_m0scan')
+    m0scan = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_m0scan')
     bat = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_bat')
     
     # Diffusion
@@ -62,7 +62,7 @@ def infotodict(seqinfo):
     
     # Field Maps
     # fm2d2r
-    fmap_diff = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_part-phase_MEGRE')
+    fmap_diff = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_echo-0_part-phase_MEGRE')
     fmap_magnitude = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_part-mag_MEGRE')
     
     # MEGRE
@@ -142,8 +142,6 @@ def infotodict(seqinfo):
         * sequence_name
         """
         
-        # print("\n {} \n".format(s.TR))
-        
         # Field Maps needs verification
         # fm_r + 2d + 2
         if ('fm2d2r' in s.sequence_name):
@@ -175,13 +173,14 @@ def infotodict(seqinfo):
         # FGATIR, 3d-EDGE, WAIR, STIR
         # tfl + 3d + 1
         if ('tfl3d1' in s.sequence_name):
+            # print("\n #################### \n series_files is {} \n #################### \n".format(s.series_files))
             if ('FGATIR' in s.series_description.strip().upper()):
                 info[fgatir_T1w].append(s.series_id)
                 continue
             elif ('3D-EDGE' in s.series_description.strip().upper()):
                 info[edge3d_T1w].append(s.series_id)
                 continue
-            elif (s.series_files == 1):
+            elif (s.series_files == 1 or s.series_files == 192):
                 info[mprage_T1w].append(s.series_id)
                 continue
             elif (s.series_files == 3):
@@ -221,22 +220,22 @@ def infotodict(seqinfo):
             'epse2d' in s.sequence_name) and 'FMRI' in s.image_type[2].strip()):
             if ('SBREF' in s.series_description.strip().upper()):
                 if ('PA' in s.series_description.strip().upper()):
-                    info[bold_ref].append({'item': s.series_id, 'dir':'PA'})
+                    info[bold_ref].append({'item': s.series_id, 'dir':'_dir-PA'})
                     continue
                 elif ('AP' in s.series_description.strip().upper()):
-                    info[bold_ref].append({'item': s.series_id, 'dir':'AP'})
+                    info[bold_ref].append({'item': s.series_id, 'dir':'_dir-AP'})
                     continue
                 else:
-                    info[bold_ref].append({'item': s.series_id, 'dir':'none'})
+                    info[bold_ref].append({'item': s.series_id, 'dir':''})
                     continue
             if ('PA' in s.series_description.strip().upper()):
-                info[bold].append({'item': s.series_id, 'dir':'PA'})
+                info[bold].append({'item': s.series_id, 'dir':'_dir-PA'})
                 continue
             elif ('AP' in s.series_description.strip().upper()):
-                info[bold].append({'item': s.series_id, 'dir':'AP'})
+                info[bold].append({'item': s.series_id, 'dir':'_dir-AP'})
                 continue
             else:
-                info[bold].append({'item': s.series_id, 'dir':'none'})
+                info[bold].append({'item': s.series_id, 'dir':''})
                 continue
                         
         # Perfusion
@@ -246,17 +245,17 @@ def infotodict(seqinfo):
             if ('ORIGINAL' in s.image_type[0].strip()):
                 if ('MZERO' in s.series_description.strip().upper() or 'M0' in s.series_description.strip().upper()):
                     if ('PA' in s.series_description.strip().upper() and not 'PASL' in s.series_description.strip().upper()):
-                        info[m0scan].append({'item': s.series_id, 'dir':'PA'})
+                        info[m0scan].append({'item': s.series_id, 'dir':'_dir-PA'})
                         continue
                     elif ('AP' in s.series_description.strip().upper()):
-                        info[m0scan].append({'item': s.series_id, 'dir':'AP'})
+                        info[m0scan].append({'item': s.series_id, 'dir':'_dir-AP'})
                         continue
                 else:
                     if ('PA' in s.series_description.strip().upper() and not 'PASL' in s.series_description.strip().upper()):
-                        info[asl].append({'item': s.series_id, 'dir':'PA'})
+                        info[asl].append({'item': s.series_id, 'dir':'_dir-PA'})
                         continue
                     elif ('AP' in s.series_description.strip().upper()):
-                        info[asl].append({'item': s.series_id, 'dir':'AP'})
+                        info[asl].append({'item': s.series_id, 'dir':'_dir-AP'})
                         continue
             elif (('DERIVED' in s.image_type[0].strip()) and ('SUBTRACTION' in s.image_type[3].strip())):
                 info[perfusion].append(s.series_id)
@@ -294,7 +293,7 @@ def infotodict(seqinfo):
                     continue  
         
         # Angiography
-        # fl_r + 3d + 1
+        # fl_r + 3d + 1: SWI?
         if ('fl3d1r' in s.sequence_name):
             if ('ORIGINAL' in s.image_type[0].strip()):
                 info[angio].append(s.series_id)
