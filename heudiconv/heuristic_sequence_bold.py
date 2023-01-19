@@ -40,8 +40,8 @@ def infotodict(seqinfo):
     flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
     
     # BOLD
-    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_bold')
-    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_sbref')
+    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-{task}_run-{item:02d}_bold')
+    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-{task}_run-{item:02d}_sbref')
     
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_asl')
@@ -173,7 +173,6 @@ def infotodict(seqinfo):
         # FGATIR, 3d-EDGE, WAIR, STIR
         # tfl + 3d + 1
         if ('tfl3d1' in s.sequence_name):
-            # print("\n #################### \n series_files is {} \n #################### \n".format(s.series_files))
             if ('FGATIR' in s.series_description.strip().upper()):
                 info[fgatir_T1w].append(s.series_id)
                 continue
@@ -216,9 +215,35 @@ def infotodict(seqinfo):
         # BOLD
         # epfid + 2d
         # epse + 2d
+        """
+        if (('epfid2d' in s.sequence_name or 
+            'epse2d' in s.sequence_name) and 'FMRI' in s.image_type[2].strip()):
+            if ('SBREF' in s.series_description.strip().upper()):
+                if ('PA' in s.series_description.strip().upper()):
+                    info[bold_ref].append({'item': s.series_id, 'dir':'_dir-PA'})
+                    continue
+                elif ('AP' in s.series_description.strip().upper()):
+                    info[bold_ref].append({'item': s.series_id, 'dir':'_dir-AP'})
+                    continue
+                else:
+                    info[bold_ref].append({'item': s.series_id, 'dir':''})
+                    continue
+            if ('PA' in s.series_description.strip().upper()):
+                info[bold].append({'item': s.series_id, 'dir':'_dir-PA'})
+                continue
+            elif ('AP' in s.series_description.strip().upper()):
+                info[bold].append({'item': s.series_id, 'dir':'_dir-AP'})
+                continue
+            else:
+                info[bold].append({'item': s.series_id, 'dir':''})
+                continue
+        """
+                      
+        # BOLD_new
         if (('epfid2d' in s.sequence_name or 
             'epse2d' in s.sequence_name) and 'FMRI' in s.image_type[2].strip()):
             myItem = {'item': s.series_id}
+            myItem['task'] = input(f"Please enter the task name for {s.protocol_name}:")
             if ('PA' in s.series_description.strip().upper()):
                 myItem['dir'] = '_dir-PA'
             elif ('AP' in s.series_description.strip().upper()): 
@@ -301,7 +326,6 @@ def infotodict(seqinfo):
                         info[angio_MIP].append({'item': s.series_id, 'acq': 'sagittal'})
                         continue
         
-        # print("\n #################### \n series_files is {} \n #################### \n".format(s.series_files))            
         info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
                   
         
