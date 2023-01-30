@@ -25,11 +25,13 @@ def infotodict(seqinfo):
     # FGATIR
     fgatir_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-FGATIR_run-{item:02d}_T1w')
     edge3d_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-3DEDGE_run-{item:02d}_T1w')
-    wair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-WAIR_run-{item:02d}_T1w')
-    stir = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-STIR_run-{item:02d}_T1w')
+    wair_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-WAIR_run-{item:02d}_T2w')
+    stir_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-STIR_run-{item:02d}_T2w')
     
-    # T1w
+    # anatotimcal
     #t1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T1w')
+    t2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T2w')
+    t2starw = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T2starw')
     
     # SPACE
     spc_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_T2w')
@@ -83,8 +85,10 @@ def infotodict(seqinfo):
         mp2rage_T1w: [], \
         fgatir_T1w: [], \
         edge3d_T1w: [], \
-        wair: [], \
-        stir: [], \
+        wair_T2w: [], \
+        stir_T2w: [], \
+        t2w: [], \
+        t2starw: [], \
         spc_T2w: [], \
         spc_T1w: [], \
         spc_FLAIR: [], \
@@ -190,12 +194,18 @@ def infotodict(seqinfo):
         
         # tir + 2d + 1
         if ('tir2d1' in s.sequence_name):
-            info[wair].append(s.series_id)
+            info[wair_T2w].append(s.series_id)
             continue
         
         # tir_rr + 2d + 1
         if ('tir2d1rr' in s.sequence_name):
-            info[stir].append(s.series_id)
+            info[stir_T2w].append(s.series_id)
+            continue
+        
+        # hippocampus
+        # tse + 2d + 1
+        if ('tse2d1' in s.sequence_name):
+            info[t2w].append(s.series_id)
             continue
         
         # SPACE needs verification
@@ -306,9 +316,6 @@ def infotodict(seqinfo):
                   
         
         """
-        # hippocampus
-        # tse + 2d + 1
-        if ('tse2d1' in s.sequence_name):
             
         # FLAIR
         if ('FLAIR' in s.series_description.strip().upper() or ('DA' in s.series_description.strip().upper() and 'FL' in s.series_description.strip().upper())):
