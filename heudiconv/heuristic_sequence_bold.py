@@ -25,11 +25,13 @@ def infotodict(seqinfo):
     # FGATIR
     fgatir_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-FGATIR_run-{item:02d}_T1w')
     edge3d_T1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-3DEDGE_run-{item:02d}_T1w')
-    wair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-WAIR_run-{item:02d}_T1w')
-    stir = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-STIR_run-{item:02d}_T1w')
+    wair_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-WAIR_run-{item:02d}_T2w')
+    stir_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-STIR_run-{item:02d}_T2w')
     
-    # T1w
+    # anatomical
     #t1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T1w')
+    t2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T2w')
+    t2starw = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}{part}_T2starw')
     
     # SPACE
     spc_T2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_acq-SPACE_run-{item:02d}_T2w')
@@ -76,6 +78,9 @@ def infotodict(seqinfo):
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
     angio_MIP = create_key('{bids_subject_session_dir}/extra/anat/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_MIP')
     
+    #SWI, QSM
+    
+    
     # extra
     extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_{des}_run-{item:02d}_extra')
     
@@ -83,8 +88,10 @@ def infotodict(seqinfo):
         mp2rage_T1w: [], \
         fgatir_T1w: [], \
         edge3d_T1w: [], \
-        wair: [], \
-        stir: [], \
+        wair_T2w: [], \
+        stir_T2w: [], \
+        t2w: [], \
+        t2starw: [], \
         spc_T2w: [], \
         spc_T1w: [], \
         spc_FLAIR: [], \
@@ -142,30 +149,58 @@ def infotodict(seqinfo):
         * sequence_name
         """
         
+        description = (s.series_description + '_' + s.protocol_name).strip().upper()
+        
+        #ABCD
+        if ('ABCD3d' in s.sequence_name or 'tfl_me3d1' in s.sequence_name):
+            if ('MPR' in description):
+                info[mprage_T1w].append(s.series_id)
+                continue
+            elif ('MP2RAGE' in description):
+                info[mp2rage_T1w].append(s.series_id)
+                continue
+            elif ('SPC' in description):
+                if ('T2' in description): 
+                    info[spc_T2w].append(s.series_id)
+                    continue
+                elif ('T1' in description):
+                    info[spc_T1w].append(s.series_id)
+                    continue
+                
+        #WIP
+        if ('WIPfl3d' in s.sequence_name):
+            if ('MAG' in description):
+                info[t2starw].append({'item': s.series_id, 'part': '_part-mag'})
+                continue
+            if ('PHA' in description):
+                info[t2starw].append({'item': s.series_id, 'part': '_part-phase'})
+                continue
+                
+        
         # Field Maps needs verification
         # fm_r + 2d + 2
         if ('fm2d2r' in s.sequence_name):
             if('P' in (s.image_type[2].strip()) ):
-                    info[fmap_diff].append(s.series_id)
-                    continue
+                info[fmap_diff].append(s.series_id)
+                continue
             if('M' in (s.image_type[2].strip()) ):
-                    info[fmap_magnitude].append(s.series_id)
-                    continue
+                info[fmap_magnitude].append(s.series_id)
+                continue
 
         # MEGRE
         # fl + 2d + 2
         # qfl + 3d + 4
         if ('fl2d2' in s.sequence_name or \
             'qfl3d4' in s.sequence_name):
-            if ('FIELD' in s.series_description.strip().upper() \
-                and 'MAP' in s.series_description.strip().upper()):
+            if ('FIELD' in description \
+                and 'MAP' in description):
                 if('P' in (s.image_type[2].strip())):
                     info[fmap_megre_phase].append(s.series_id)
                     continue
                 elif ('M' in (s.image_type[2].strip())):
                     info[fmap_megre_magnitude].append(s.series_id)
                     continue
-            if (not ('FIELD' in s.series_description.strip().upper()) and not ('MAP' in s.series_description.strip().upper())):
+            if (not ('FIELD' in description) and not ('MAP' in description)):
                 info[megre].append(s.series_id)
                 continue
         
@@ -173,10 +208,11 @@ def infotodict(seqinfo):
         # FGATIR, 3d-EDGE, WAIR, STIR
         # tfl + 3d + 1
         if ('tfl3d1' in s.sequence_name):
-            if ('FGATIR' in s.series_description.strip().upper()):
+            # print("\n #################### \n series_files is {} \n #################### \n".format(s.series_files))
+            if ('FGATIR' in description):
                 info[fgatir_T1w].append(s.series_id)
                 continue
-            elif ('3D-EDGE' in s.series_description.strip().upper()):
+            elif ('3D-EDGE' in description):
                 info[edge3d_T1w].append(s.series_id)
                 continue
             elif (s.series_files == 1 or s.series_files == 192):
@@ -189,12 +225,18 @@ def infotodict(seqinfo):
         
         # tir + 2d + 1
         if ('tir2d1' in s.sequence_name):
-            info[wair].append(s.series_id)
+            info[wair_T2w].append(s.series_id)
             continue
         
         # tir_rr + 2d + 1
         if ('tir2d1rr' in s.sequence_name):
-            info[stir].append(s.series_id)
+            info[stir_T2w].append(s.series_id)
+            continue
+        
+        # hippocampus
+        # tse + 2d + 1
+        if ('tse2d1' in s.sequence_name):
+            info[t2w].append(s.series_id)
             continue
         
         # SPACE needs verification
@@ -203,74 +245,48 @@ def infotodict(seqinfo):
             if ('spcir' in s.sequence_name):
                 info[spc_FLAIR].append(s.series_id)
                 continue
-            # spc + R
-            elif ('spcR' in s.sequence_name):
-                if ('T2' in s.series_description.strip().upper()): 
+            # spc + R?
+            elif ('spc' in s.sequence_name):
+                if ('T2' in description): 
                     info[spc_T2w].append(s.series_id)
                     continue
-                elif ('T1' in s.series_description.strip().upper()):
+                elif ('T1' in description):
                     info[spc_T1w].append(s.series_id)
                     continue  
         
-        # BOLD
+        # BOLD new
         # epfid + 2d
         # epse + 2d
-        """
-        if (('epfid2d' in s.sequence_name or 
-            'epse2d' in s.sequence_name) and 'FMRI' in s.image_type[2].strip()):
-            if ('SBREF' in s.series_description.strip().upper()):
-                if ('PA' in s.series_description.strip().upper()):
-                    info[bold_ref].append({'item': s.series_id, 'dir':'_dir-PA'})
-                    continue
-                elif ('AP' in s.series_description.strip().upper()):
-                    info[bold_ref].append({'item': s.series_id, 'dir':'_dir-AP'})
-                    continue
-                else:
-                    info[bold_ref].append({'item': s.series_id, 'dir':''})
-                    continue
-            if ('PA' in s.series_description.strip().upper()):
-                info[bold].append({'item': s.series_id, 'dir':'_dir-PA'})
-                continue
-            elif ('AP' in s.series_description.strip().upper()):
-                info[bold].append({'item': s.series_id, 'dir':'_dir-AP'})
-                continue
-            else:
-                info[bold].append({'item': s.series_id, 'dir':''})
-                continue
-        """
-                      
-        # BOLD_new
         if (('epfid2d' in s.sequence_name or 
             'epse2d' in s.sequence_name) and 'FMRI' in s.image_type[2].strip()):
             myItem = {'item': s.series_id}
             myItem['task'] = input(f"Please enter the task name for {s.protocol_name}:")
-            if ('PA' in s.series_description.strip().upper()):
+            if ('PA' in description):
                 myItem['dir'] = '_dir-PA'
-            elif ('AP' in s.series_description.strip().upper()): 
+            elif ('AP' in description): 
                 myItem['dir'] = '_dir-AP'
             else:
                 myItem['dir'] = ''
-            if ('SBREF' in s.series_description.strip().upper()):
+            if ('SBREF' in description):
                 info[bold_ref].append(myItem)
                 continue
             else:
                 info[bold].append(myItem)
                 continue
-                      
                         
         # Perfusion
         # tgse + 3d + 1
         if ('ASL' in s.image_type[2].strip() or \
             'tgse3d1' in s.sequence_name):
             myItem = {'item': s.series_id}
-            if ('PA' in s.series_description.strip().upper() and not 'PASL' in s.series_description.strip().upper()):
+            if ('PA' in description and not 'PASL' in description):
                 myItem['dir'] = '_dir-PA'
-            elif ('AP' in s.series_description.strip().upper()):
+            elif ('AP' in description):
                 myItem['dir'] = '_dir-AP'
             else:
                 myItem['dir'] = ''    
             if ('ORIGINAL' in s.image_type[0].strip()):
-                if ('MZERO' in s.series_description.strip().upper() or 'M0' in s.series_description.strip().upper()):
+                if ('MZERO' in description or 'M0' in description):
                     info[m0scan].append(myItem)
                     continue
                 else:
@@ -290,7 +306,7 @@ def infotodict(seqinfo):
         # Diffusion
         # epse + 2d
         if ('DIFFUSION' in s.image_type[2].strip() or \
-            ('epse2d' in s.sequence_name and 'DWI' in s.series_description.strip().upper())):
+            ('epse2d' in s.sequence_name and 'DWI' in description)):
             if ('ORIGINAL' in s.image_type[0].strip()):
                 info[dwi].append(s.series_id)
                 continue
@@ -318,24 +334,22 @@ def infotodict(seqinfo):
                 info[angio].append(s.series_id)
                 continue
             elif ('DERIVED' in s.image_type[0].strip()):
-                if ('MIP' in s.series_description.strip().upper()):
-                    if ('COR' in s.series_description.strip().upper()):
+                if ('MIP' in description):
+                    if ('COR' in description):
                         info[angio_MIP].append({'item': s.series_id, 'acq': 'coronal'})
                         continue
-                    if ('SAG' in s.series_description.strip().upper()):
+                    if ('SAG' in description):
                         info[angio_MIP].append({'item': s.series_id, 'acq': 'sagittal'})
                         continue
         
+        # print("\n #################### \n series_files is {} \n #################### \n".format(s.series_files))            
         info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
                   
         
         """
-        # hippocampus
-        # tse + 2d + 1
-        if ('tse2d1' in s.sequence_name):
             
         # FLAIR
-        if ('FLAIR' in s.series_description.strip().upper() or ('DA' in s.series_description.strip().upper() and 'FL' in s.series_description.strip().upper())):
+        if ('FLAIR' in description or ('DA' in description and 'FL' in description)):
             info[flair].append(s.series_id)
             continue   
                 
@@ -346,3 +360,5 @@ def infotodict(seqinfo):
         
 
     return info
+
+
