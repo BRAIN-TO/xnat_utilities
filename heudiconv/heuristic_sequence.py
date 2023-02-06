@@ -42,8 +42,7 @@ def infotodict(seqinfo):
     flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
     
     # BOLD
-    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_bold')
-    bold_ref = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_sbref')
+    bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_{suffix}')
     
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_asl')
@@ -73,6 +72,7 @@ def infotodict(seqinfo):
     fmap_megre_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_magnitude')
     fmap_megre_phase = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_phase')
     megre = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_MEGRE')
+    # epi = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}{dir}_epi')
     
     # Angiography
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
@@ -96,7 +96,6 @@ def infotodict(seqinfo):
         spc_FLAIR: [], \
         flair: [], \
         bold: [], \
-        bold_ref: [], \
         asl: [], \
         perfusion: [], \
         dce: [], \
@@ -113,6 +112,7 @@ def infotodict(seqinfo):
         fmap_megre_magnitude: [], \
         fmap_megre_phase: [], \
         megre: [], \
+        # epi: [], \
         fmap_diff: [], \
         fmap_magnitude: [], \
         angio: [], \
@@ -258,18 +258,20 @@ def infotodict(seqinfo):
         if (('epfid2d' in s.sequence_name or 
             'epse2d' in s.sequence_name) and 'FMRI' in s.image_type[2].strip()):
             myItem = {'item': s.series_id}
+            if ('SBREF' in description):
+                myItem['suffix'] = 'sbref'
+            else:
+                myItem['suffix'] = 'bold'
             if ('PA' in description):
                 myItem['dir'] = '_dir-PA'
+            #    info[epi].append(myItem)
             elif ('AP' in description): 
                 myItem['dir'] = '_dir-AP'
+            #    info[epi].append(myItem)
             else:
                 myItem['dir'] = ''
-            if ('SBREF' in description):
-                info[bold_ref].append(myItem)
-                continue
-            else:
-                info[bold].append(myItem)
-                continue
+            info[bold].append(myItem)
+            continue
                       
                         
         # Perfusion
