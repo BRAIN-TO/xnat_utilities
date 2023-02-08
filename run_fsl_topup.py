@@ -1,4 +1,3 @@
-from builtins import range
 import nipype.interfaces.io as nio  # Data i/o
 from nipype.interfaces.fsl.epi import TOPUP, ApplyTOPUP
 from nipype.interfaces.fsl.preprocess import FUGUE
@@ -45,7 +44,7 @@ def run_nipype_interface():
     res = fslroi.run()
 
     #fslmerge
-    merger = fsl.Merge(in_file=[b01,b02], dimension='t', merged_file='both_b0.nii.gz')
+    merger = fsl.Merge(in_files=[b01,b02], dimension='t', merged_file='both_b0.nii.gz')
     res = merger.run()
     
     #fsl topup
@@ -78,7 +77,6 @@ def run_nipype_workflow():
     
     #fsl topup
     topup = pe.Node(interface=TOPUP(), name="topup")
-    topup.inputs.encoding_file = "acq_param.txt"
     topup.inputs.out_field = "fieldmap_Hz.nii.gz"
 
     #fsl applytopup
@@ -91,7 +89,6 @@ def run_nipype_workflow():
 
     #fsl fugue
     fugue = pe.Node(interface=FUGUE(), name="fugue")
-    fugue.inputs.in_file = image1
     fugue.inputs.dwell_time = value1
     fugue.inputs.unwarped_file = f"{image1}_corrected.nii.gz"
     fugue.inputs.unwarp_direction = "y-"
@@ -104,15 +101,21 @@ def run_nipype_workflow():
     preprocessing.connect(topup, "out_field", fslmaths, "in_file")
     preprocessing.connect(fslmaths, "out_file", fugue, "fmap_in_file")
 
-    #datasource
+    #datasource1
     datasource = pe.Node(
-        interface=nio.DataGrabber(outfields=['func']), name='datasource')
+        interface=nio.DataGrabber(outfields=['b0', 'acq_param', 'image1']), name='datasource')
     datasource.inputs.base_directory = "/home/yuexin/Documents/topup/"
     datasource.inputs.sort_filelist = True
-    datasource.inputs.template = 'b0_sub-01_ses-01_task-rest_acq-EP2D_rec-2x2_dir-*_run-1_part-mag_bold.nii.gz'
+    datasource.inputs.template_args = dict(
+        b0=[[['b0_sub-01_ses-01_task-rest_acq-EP2D_rec-2x2_dir-AP_run-1_part-mag_bold.nii.gz','b0_sub-01_ses-01_task-rest_acq-EP2D_rec-2x2_dir-PA_run-1_part-mag_bold.nii.gz']]],
+        acq_param=[['acq_param.txt']],
+        image1=[['sub-01_ses-01_task-rest_acq-EP2D_rec-2x2_dir-AP_run-1_part-mag_bold.nii.gz']])
+    datasource.inputs.template='%s'
 
     #connect preprocessing to datasource
-    preprocessing.connect(datasource, 'func', fslmerge, 'in_files')
+    preprocessing.connect(datasource, 'b0', fslmerge, 'in_files')
+    preprocessing.connect(datasource, 'acq_param', topup, 'encoding_file')
+    preprocessing.connect(datasource, 'image1', fugue, 'in_file')
 
     #connect datasink to preprocessing
     datasink = pe.Node(interface=nio.DataSink(), name="datasink")
