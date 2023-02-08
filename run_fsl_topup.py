@@ -18,8 +18,8 @@ json1 = file1.split(".")[0] + ".json"
 json2 = file2.split(".")[0] + ".json"
 image1 = file1.split(".")[0] + ".nii.gz"
 image2 = file2.split(".")[0] + ".nii.gz"
-b01 = "b0_" + file1.split(".")[0]
-b02 = "b0_" + file2.split(".")[0]
+b01 = "b0_" + file1.split(".")[0] + ".nii.gz"
+b02 = "b0_" + file2.split(".")[0] + ".nii.gz"
 
 #create the parameter file with C4
 try:
@@ -73,8 +73,7 @@ def run_nipype_workflow():
     
     #fslmerge
     fslmerge = pe.Node(interface=fsl.Merge(), name="fslmerge")
-    fslmerge.inputs.infile = [b01,b02]
-    fslmerge.inputs.dimention = "t"
+    fslmerge.inputs.dimension = "t"
     fslmerge.inputs.merged_file = "both_b0.nii.gz"
     
     #fsl topup
@@ -133,7 +132,7 @@ def run_command():
     subprocess.run(["fslmerge", "-t", "both_b0.nii.gz", b01, b02])
     
     #fsl topup
-    subprocess.run(["topup", "--imain=both_b0.nii.gz", "--datain=acq_param.txt", "--out=my_topup", "--fout=fieldmap_Hz.nii.gz"])
+    subprocess.run(["topup", "--imain=both_b0.nii.gz", "--datain=acq_param.txt", "--config=b02b0.cnf", "--out=my_topup", "--fout=fieldmap_Hz.nii.gz"])
     
     #fslmaths to convert Hz to radian
     subprocess.run(["fslmaths", "fieldmap_Hz.nii.gz", "-mul", "6.28", "fieldmap_radian.nii.gz"])
@@ -142,5 +141,5 @@ def run_command():
     subprocess.run(["fugue", "-i", image1, f"--dwell={value1}", "--loadfmap=fieldmap_radian.nii.gz", "-u", "{file1}_corrected.nii.gz", "--unwarpdir=y-", "--saveshift=my_shift"])
     
 #run_nipype_interface()
-#run_nipype_workflow()
-run_command()
+run_nipype_workflow()
+#run_command()
