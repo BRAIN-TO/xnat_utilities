@@ -58,8 +58,9 @@ https://fmriprep.org/en/stable/
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
 
 1. Two images of opposite encoding direction and their corresponding metadata json files are required. Make sure the "AcquisitionMatrixPE" and "EffectiveEchoSpacing" fields are filled.
-2. Get the script and put it in the same folder as data.
+2. Get nipype using [docker, conda or Pypi](https://nipype.readthedocs.io/en/latest/users/install.html) or set up [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation). Virtual environment recommended.
+2. Get the script and put it in the same folder as the data.
 3. run `python run_fsl_topup.py <file_to_correct_name> <file_reverse_name>`
 
 ### scripts provided:
-run_fsl_topup.py: takes filenames and run FSL topup to generate the distortion corrected image.
+run_fsl_topup.py: takes filenames and run FSL topup to generate the distortion corrected image. You can choose from "run_nipype_interface()", "run_nipype_workflow()", or "run_command()"
