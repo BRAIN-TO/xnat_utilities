@@ -13,28 +13,12 @@ import os
 
 script, file1, file2 = argv
 
-json1 = file1.split(".")[0] + ".json"
-json2 = file2.split(".")[0] + ".json"
-image1 = file1.split(".")[0] + ".nii.gz"
-image2 = file2.split(".")[0] + ".nii.gz"
-b01 = "b0_" + file1.split(".")[0] + ".nii.gz"
-b02 = "b0_" + file2.split(".")[0] + ".nii.gz"
-
-#create the parameter file with C4
-try:
-    with open(json1, 'r') as json_file:
-        data = json.load(json_file)
-    value1 = float(data["EffectiveEchoSpacing"])
-    value2 = float(data["AcquisitionMatrixPE"])
-    c4 = value1 * value2
-except FileNotFoundError:
-    print("Error: Json file is missing.")
-except KeyError:
-    print("Error: Effective Echo Spacing and/or Acquisition Matrix PE do not exist.")
-        
-f = open('acq_param.txt', 'a')
-f.write(f"0 -1 0 {c4}\n0 1 0 {c4}")
-f.close
+def prepare_parameter_file(c):
+    #create the parameter file with C4
+    if not os.path.exists('acq_param.txt'):
+        f = open('acq_param.txt', 'a')
+        f.write(f"0 -1 0 {c}\n0 1 0 {c}")
+        f.close
 
 def run_nipype_interface():
     #fslroi for b0 image
@@ -123,7 +107,7 @@ def run_nipype_workflow():
     preprocessing.connect(fugue, 'unwarped_file', datasink, 'contrasts.@T')
 
     #run preprocessing
-    preprocessing.config['execution']['job_finished_timeout'] = 60
+    #preprocessing.config['execution']['job_finished_timeout'] = 60
     preprocessing.run()
 
 def run_command():
@@ -142,7 +126,28 @@ def run_command():
     
     #fsl fugue
     subprocess.run(["fugue", "-i", image1, f"--dwell={value1}", "--loadfmap=fieldmap_radian.nii.gz", "-u", "{file1}_corrected.nii.gz", "--unwarpdir=y-", "--saveshift=my_shift"])
-    
+
+#define file names
+json1 = file1.split(".")[0] + ".json"
+json2 = file2.split(".")[0] + ".json"
+image1 = file1.split(".")[0] + ".nii.gz"
+image2 = file2.split(".")[0] + ".nii.gz"
+b01 = "b0_" + file1.split(".")[0] + ".nii.gz"
+b02 = "b0_" + file2.split(".")[0] + ".nii.gz"
+
+#read json file and get c4 value
+try:
+    with open(json1, 'r') as json_file:
+        data = json.load(json_file)
+        value1 = float(data["EffectiveEchoSpacing"])
+        value2 = float(data["AcquisitionMatrixPE"])
+        c4 = value1 * value2
+except FileNotFoundError:
+    print(f"Error: Cannot find {json1}.")
+except KeyError:
+    print("Error: Effective Echo Spacing and/or Acquisition Matrix PE do not exist.")
+
+prepare_parameter_file(c4)
 #run_nipype_interface()
 run_nipype_workflow()
 #run_command()
