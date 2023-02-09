@@ -6,7 +6,7 @@ Remember to change everything with <> below according to your own directory stru
 
 ## Prerequisite
 1. Docker engine (installation for [ubuntu](https://github.com/srikash/TheBeesKnees/wiki/Installing-Docker-on-Ubuntu) or official installation documentation [here](https://docs.docker.com/engine/install/))
-2. All dicoms are organized directly inside sub-## folders (e.g., sub-01, sub-02...) in the project folder. Data within subfolders under subject folder may not be recognized.
+2. All dicoms are organized inside sub-## folders (e.g., sub-01, sub-02...) in the project folder.
 3. Virtual environment recommended.
 
 ## BIDScoin
@@ -25,8 +25,8 @@ https://heudiconv.readthedocs.io/en/latest/
 Method1 for a single subject:
 1. Get a converter file (available in ./heudiconv/).
 2. Use one of the following command. \
-a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest -d <base_dir/dicoms_dir>/sub-{subject}/*.dcm -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`\
-b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv -d <base_dir/dicoms_dir>/sub-{subject}/*.dcm -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
+a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest --files <base_dir/dicoms_dir>/ -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`\
+b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv --files <base_dir/dicoms_dir>/ -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
 
 \* Relative path from a base directory rather than absolute path is highly recommended. \
 \* If you need to run heudiconv on the same data again, remove the existing output folder first.
@@ -66,7 +66,7 @@ https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
 1. Two images of opposite encoding direction and their corresponding metadata json files are required. Make sure the "AcquisitionMatrixPE" and "EffectiveEchoSpacing" fields are available.
 2. Get nipype using [docker, conda or Pypi](https://nipype.readthedocs.io/en/latest/users/install.html) or set up [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation). Virtual environment recommended.
 2. Get the script and put it in the same folder as the data.
-3. run `python run_fsl_topup.py <file_to_correct_name> <file_reverse_name>` according to your preferred python version.
+3. run `python run_fsl_topup.py <file_to_correct> <file_reverse_direction>` according to your preferred python version.
 4. The results will either be in the current directory or in a new directory ./output/contrasts/ depending on the method chosen.
 
 ### scripts provided:

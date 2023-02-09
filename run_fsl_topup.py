@@ -36,8 +36,8 @@ def run_nipype_interface():
     res = topup.run()
 
     #fsl applytopup
-    #applytopup = ApplyTOPUP(in_files = [image1, image2], encoding_file = "acq_param.txt", in_topup_fieldcoef = "my_topup_fieldcoef.nii.gz", in_topup_movpar = "my_topup_movpar.txt")
-    #res = applytopup.run()
+    applytopup = ApplyTOPUP(in_files = [image1], encoding_file = "acq_param.txt", in_topup_fieldcoef = "my_topup_fieldcoef.nii.gz", in_topup_movpar = "my_topup_movpar.txt", in_index = [1], method = 'jac')
+    res = applytopup.run()
 
     #fslmath to convert to radian
     fslmaths = BinaryMaths(in_file = "fieldmap_Hz.nii.gz", operation = 'mul', operand_value = 6.28, out_file = "fieldmap_radian.nii.gz")
@@ -148,6 +148,6 @@ except KeyError:
     print("Error: Effective Echo Spacing and/or Acquisition Matrix PE do not exist.")
 
 prepare_parameter_file(c4)
-#run_nipype_interface()
-run_nipype_workflow()
+run_nipype_interface()
+#run_nipype_workflow()
 #run_command()

@@ -50,5 +50,5 @@ docker run --rm -it -v ${PWD}:/base nipy/heudiconv:latest -d /base/${dicom_dir}/
 
 ## all in one folder command
 printf "\n Now processing ${dicom_dir} sub-${isubject} \n"
-docker run --rm -it -v ${PWD}:/base heudiconv -d /base/${dicom_dir}/sub-{subject}/*.dcm -o /base/${dicom_dir}_BIDS/ -f /base/${converter} -s ${isubject} -c dcm2niix -b --overwrite --minmeta
+docker run --rm -it -v ${PWD}:/base heudiconv --files /base/${dicom_dir}/sub-${isubject}/ -o /base/${dicom_dir}_BIDS/ -f /base/${converter} -s ${isubject} -c dcm2niix -b --overwrite --minmeta
 

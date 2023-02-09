@@ -244,7 +244,7 @@ def infotodict(seqinfo):
                 info[spc_FLAIR].append(s.series_id)
                 continue
             # spc + R?
-            elif ('spc' in s.sequence_name):
+            elif ('spcR' in s.sequence_name):
                 if ('T2' in description): 
                     info[spc_T2w].append(s.series_id)
                     continue
