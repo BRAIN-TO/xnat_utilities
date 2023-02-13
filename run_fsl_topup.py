@@ -125,7 +125,7 @@ def run_command():
     subprocess.run(["fslmaths", "fieldmap_Hz.nii.gz", "-mul", "6.28", "fieldmap_radian.nii.gz"])
     
     #fsl fugue
-    subprocess.run(["fugue", "-i", image1, f"--dwell={value1}", "--loadfmap=fieldmap_radian.nii.gz", "-u", "{file1}_corrected.nii.gz", "--unwarpdir=y-", "--saveshift=my_shift"])
+    subprocess.run(["fugue", "-i", image1, f"--dwell={value1}", "--loadfmap=fieldmap_radian.nii.gz", "-u", f"{file1}_corrected.nii.gz", "--unwarpdir=y-", "--saveshift=my_shift"])
 
 #define file names
 json1 = file1.split(".")[0] + ".json"

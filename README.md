@@ -54,11 +54,11 @@ https://fmriprep.org/en/stable/
 1. Data have to be in BIDS. You can validate your data with the [validator](http://incf.github.io/bids-validator/). Normally, no error or warning should be present for fMRIPrep to run properly (otherwise use `--skip_bids_validation` flag as below).
 2. Get the docker image with `docker pull nipreps/fmriprep:latest`
 3. Obtain Freesurfer software and its license.txt.
-3. `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out -v <freesurfer_license_path>:/opt/freesurfer/license.txt nipreps/fmriprep:latest /data /out participant --skip_bids_validation --fs-no-reconall --md-only-boilerplate --output-spaces`
+3. `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out -v <freesurfer_license_path>:/opt/freesurfer/license.txt nipreps/fmriprep:latest /data /out participant --skip_bids_validation --fs-no-reconall --md-only-boilerplate --output-spaces T1w`
 
 \* `--fs-no-reconall` = skip surface reconstruction\
 \* `--md-only-boilerplate` = skip generation of citation with pandoc\
-\* `--output-spaces` = skip normalization
+\* `--output-spaces T1w` = skip normalization
 
 ## TOPUP
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
