@@ -1,7 +1,7 @@
 # xnat_utilities
 Code base for XNAT applications \
 Instructions are based on Ubuntu 20.04.5 LTS \
-Remember to change everything with <> below according to your own directory structure. 
+Remember to change every field with <> below according to your own directory structure. 
 
 
 ## Prerequisite
@@ -12,7 +12,7 @@ Remember to change everything with <> below according to your own directory stru
 ## BIDScoin
 https://github.com/srikash/TheBeesKnees/wiki/Converting-DICOMs-to-BIDS-NIfTIs
 
-\* `qtcreator` may be required for opening the GUI on ubuntu.
+Note: `qtcreator` may be required for opening the GUI on ubuntu.
 
 ## HeuDiConv
 https://heudiconv.readthedocs.io/en/latest/
@@ -28,8 +28,7 @@ Method1 for a single subject:
 a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest --files <base_dir/dicoms_dir>/ -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`\
 b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv --files <base_dir/dicoms_dir>/ -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
 
-\* Relative path from a base directory rather than absolute path is highly recommended. \
-\* If you need to run heudiconv on the same data again, remove the existing output folder first.
+Note: Relative path from a base directory rather than absolute path is highly recommended. If you need to run heudiconv on the same data again, remove the existing output folder first.
 
 Method2 for a single subject using our version: (easier to use but less freedom)
 1. Get the heudiconv_test.sh from this repository and a converter file (available in ./heudiconv/).
@@ -37,9 +36,9 @@ Method2 for a single subject using our version: (easier to use but less freedom)
 3. When you are in the base directory, use `chmod u+x heudiconv_test.sh` to make the script executable. Then you can run heudiconv_test.sh with three arguments: the name of the dicom directory, the name of the converter file and the subject index (e.g., `./heudiconv_test.sh Yuexin_project heuristic_sequence.py 01`). The output will be have "BIDS" as suffix (e.g., ./Yuexin_project_BIDS).
 
 ### heuristic files provided:
-- heuristic_protocol.py: classification based on series description.
-- heuristic_sequence.py: classification based on sequence name. Users need to modify the output BOLD file name on their own by replacing "taskName" with the actual task.
-- heuristic_sequence_bold.py: classification based on sequence name. Users will be prompted to input the task name if fMRI data are present and the task will be in the output BOLD file name.
+- [heuristic_protocol.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_protocol.py): classification based on series description.
+- [heuristic_sequence.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_sequence.py): classification based on sequence name. Users need to modify the output BOLD file name on their own by replacing "taskName" with the actual task.
+- [heuristic_sequence_bold.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_sequence_bold.py): classification based on sequence name. Users will be prompted to input the task name if fMRI data are present and the task will be in the output BOLD file name.
 
 ## MRIQC
 https://mriqc.readthedocs.io/en/latest/
@@ -56,9 +55,10 @@ https://fmriprep.org/en/stable/
 3. Obtain Freesurfer software and its license.txt.
 3. `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out -v <freesurfer_license_path>:/opt/freesurfer/license.txt nipreps/fmriprep:latest /data /out participant --skip_bids_validation --fs-no-reconall --md-only-boilerplate --output-spaces T1w`
 
-\* `--fs-no-reconall` = skip surface reconstruction\
-\* `--md-only-boilerplate` = skip generation of citation with pandoc\
-\* `--output-spaces T1w` = skip normalization
+Note:\
+`--fs-no-reconall` = skip surface reconstruction\
+`--md-only-boilerplate` = skip generation of citation with pandoc\
+`--output-spaces T1w` = skip normalization to MNI space
 
 ## TOPUP
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
@@ -70,4 +70,4 @@ https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
 4. The results will either be in the current directory or in a new directory ./output/contrasts/ depending on the method chosen.
 
 ### scripts provided:
-- run_fsl_topup.py: takes filenames and run FSL TOPUP and FUGUE to generate the distortion corrected image. You can choose from "run_nipype_interface()", "run_nipype_workflow()", or "run_command()". ApplyTOPUP is also available in run_nipype_interface()
+- [run_fsl_topup.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/run_fsl_topup.py): takes filenames and run FSL TOPUP and FUGUE to generate the distortion corrected image. You can choose from "run_nipype_interface()", "run_nipype_workflow()", or "run_command()". ApplyTOPUP is also available in run_nipype_interface()
