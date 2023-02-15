@@ -1,5 +1,21 @@
 import os
 
+#Intended for for fmaps
+POPULATE_INTENDED_FOR_OPTS = {
+    'matching_parameters': ['ImagingVolume', 'Shims'],
+    'criterion': 'Closest'
+}
+
+# TEST, does it skip all setters?
+dicoms2skip = ['localiser','setter']
+
+def filter_dicom(dcmdata):
+    """Return True if a DICOM dataset should be filtered out, else False"""
+    for i in dicoms2skip:
+        if (i in dcmdata.SeriesDescription):
+            return True
+    return False
+
 def create_key(template, outtype=('nii.gz',), annotation_classes=None):
     if template is None or not template:
         raise ValueError('Template must be a valid format string')
@@ -21,15 +37,12 @@ def infotodict(seqinfo):
     # MPRAGE, FGATIR, EDGE3D, WAIR, STIR, SPACE
     template_anat = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}{acq}_run-{item:02d}{part}_{suffix}')
     
-    # anatomical
-    #t1w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T1w')
-    #t2w = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_T2w')
-    
     # FLAIR
     #flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
     
     # BOLD
     bold = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_{suffix}')
+    epi = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_epi')
     
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_asl')
@@ -42,8 +55,8 @@ def infotodict(seqinfo):
     
     # Field Maps
     # fm2d2r
-    fmap_diff = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_echo-0_part-phase_MEGRE')
-    fmap_magnitude = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_part-mag_MEGRE')
+    fmap_diff = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_phasediff')
+    fmap_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_magnitude')
     
     # MEGRE
     # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images -> check results whether it says 1 and 2
@@ -61,6 +74,7 @@ def infotodict(seqinfo):
     
     info = {template_anat: [], \
         bold: [], \
+        epi: [], \
         asl: [], \
         m0scan: [], \
         dwi: [], \
@@ -106,8 +120,12 @@ def infotodict(seqinfo):
         
         description = (s.series_description + '_' + s.protocol_name).strip().upper()
         
+        # merge WIP to angio section 
+        # remove ABCD and check again
+        # move derivatives in derivatives/scanner/sub-01/...
+        
         #ABCD
-        if ('ABCD3d' in s.sequence_name or 'tfl_me3d1' in s.sequence_name):
+        if ('tfl_me3d1' in s.sequence_name):
             if ('MPR' in description):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MPRAGE', 'part': '', 'suffix': 'T1w'})
                 continue
@@ -131,7 +149,7 @@ def infotodict(seqinfo):
                 info[template_anat].append({'item': s.series_id, 'acq': '', 'part': '_part-phase', 'suffix': 'T2starw'})
                 continue
         
-        # Field Maps needs verification
+        # Field Maps
         # fm_r + 2d + 2
         if ('fm2d2r' in s.sequence_name):
             if('P' in (s.image_type[2].strip()) ):
@@ -168,7 +186,7 @@ def infotodict(seqinfo):
             elif ('3D-EDGE' in description):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-EDGE', 'part': '', 'suffix': 'T1w'})
                 continue
-            elif (s.series_files == 1 or s.series_files == 192):
+            elif (s.series_files == 1):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MPRAGE', 'part': '', 'suffix': 'T1w'})
                 continue
             elif (s.series_files == 3):
@@ -199,7 +217,7 @@ def infotodict(seqinfo):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-SPACE', 'part': '', 'suffix': 'FLAIR'})
                 continue
             # spc + R?
-            elif ('spcR' in s.sequence_name):
+            elif ('spc' in s.sequence_name):
                 if ('T2' in description): 
                     info[template_anat].append({'item': s.series_id, 'acq': '_acq-SPACE', 'part': '', 'suffix': 'T2w'})
                     continue
@@ -219,10 +237,10 @@ def infotodict(seqinfo):
                 myItem['suffix'] = 'bold'
             if ('PA' in description):
                 myItem['dir'] = '_dir-PA'
-            #    info[epi].append(myItem)
+                info[epi].append(myItem)
+                continue
             elif ('AP' in description): 
                 myItem['dir'] = '_dir-AP'
-            #    info[epi].append(myItem)
             else:
                 myItem['dir'] = ''
             info[bold].append(myItem)

@@ -25,8 +25,8 @@ https://heudiconv.readthedocs.io/en/latest/
 Method1 for a single subject:
 1. Get a converter file (available in ./heudiconv/).
 2. Use one of the following command. \
-a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest --files <base_dir/dicoms_dir>/ -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`\
-b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv --files <base_dir/dicoms_dir>/ -o <base_dir/bids_dir>/ -f <base_dir/heuristic_dir>/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
+a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`\
+b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
 
 Note: Relative path from a base directory rather than absolute path is highly recommended. If you need to run heudiconv on the same data again, remove the existing output folder first.
 
