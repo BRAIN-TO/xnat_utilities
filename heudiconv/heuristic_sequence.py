@@ -7,7 +7,7 @@ POPULATE_INTENDED_FOR_OPTS = {
 }
 
 # TEST, does it skip all setters?
-dicoms2skip = ['localiser','setter']
+dicoms2skip = ['localiser','setter','localizer']
 
 def filter_dicom(dcmdata):
     """Return True if a DICOM dataset should be filtered out, else False"""
@@ -36,6 +36,7 @@ def infotodict(seqinfo):
     
     # MPRAGE, FGATIR, EDGE3D, WAIR, STIR, SPACE
     template_anat = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}{acq}_run-{item:02d}{part}_{suffix}')
+    template_anat_derived = create_key('derivatives/scanner/{bids_subject_session_dir}/anat/{bids_subject_session_prefix}{acq}_run-{item:02d}{part}_{suffix}')
     
     # FLAIR
     #flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
@@ -47,11 +48,11 @@ def infotodict(seqinfo):
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_asl')
     m0scan = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_m0scan')
-    template_perf_derived = create_key('{bids_subject_session_dir}/extra/perf/{bids_subject_session_prefix}_run-{item:02d}_{suffix}')
+    template_perf_derived = create_key('derivatives/scanner/{bids_subject_session_dir}/perf/{bids_subject_session_prefix}_run-{item:02d}_{suffix}')
     
     # Diffusion
     dwi = create_key('{bids_subject_session_dir}/dwi/{bids_subject_session_prefix}_run-{item:02d}_dwi')
-    template_dwi_derived = create_key('{bids_subject_session_dir}/extra/dwi/{bids_subject_session_prefix}_run-{item:02d}_{suffix}')
+    template_dwi_derived = create_key('derivatives/scanner/{bids_subject_session_dir}/dwi/{bids_subject_session_prefix}_run-{item:02d}_{suffix}')
     
     # Field Maps
     # fm2d2r
@@ -67,12 +68,13 @@ def infotodict(seqinfo):
     
     # Angiography
     angio = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_angio')
-    angio_MIP = create_key('{bids_subject_session_dir}/extra/anat/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_MIP')
+    angio_MIP = create_key('derivatives/scanner/{bids_subject_session_dir}/extra/anat/{bids_subject_session_prefix}_acq-{acq}_run-{item:02d}_MIP')
     
     # extra
-    extra = create_key('{bids_subject_session_dir}/extra/extra/{bids_subject_session_prefix}_acq-{acq}_{des}_run-{item:02d}_extra')
+    extra = create_key('{bids_subject_session_dir}/extra/{bids_subject_session_prefix}_acq-{acq}_{des}_run-{item:02d}_extra')
     
     info = {template_anat: [], \
+        template_anat_derived: [], \
         bold: [], \
         epi: [], \
         asl: [], \
@@ -86,7 +88,6 @@ def infotodict(seqinfo):
         fmap_diff: [], \
         fmap_magnitude: [], \
         angio: [], \
-        angio_MIP: [], \
         extra: []}
     # last_run = len(seqinfo)
 
@@ -119,10 +120,8 @@ def infotodict(seqinfo):
         """
         
         description = (s.series_description + '_' + s.protocol_name).strip().upper()
-        
-        # merge WIP to angio section 
-        # remove ABCD and check again
-        # move derivatives in derivatives/scanner/sub-01/...
+    
+        # SWI-MIP combined...
         
         #ABCD
         if ('tfl_me3d1' in s.sequence_name):
@@ -140,14 +139,6 @@ def infotodict(seqinfo):
                     info[template_anat].append({'item': s.series_id, 'acq': '_acq-SPACE', 'part': '', 'suffix': 'T1w'})
                     continue
                 
-        #WIP
-        if ('WIPfl3d' in s.sequence_name):
-            if ('MAG' in description):
-                info[template_anat].append({'item': s.series_id, 'acq': '', 'part': '_part-mag', 'suffix': 'T2starw'})
-                continue
-            if ('PHA' in description):
-                info[template_anat].append({'item': s.series_id, 'acq': '', 'part': '_part-phase', 'suffix': 'T2starw'})
-                continue
         
         # Field Maps
         # fm_r + 2d + 2
@@ -300,21 +291,35 @@ def infotodict(seqinfo):
                     info[template_dwi_derived].append({'item': s.series_id, 'suffix': 'ADC'})
                     continue  
         
-        # Angiography
+        # Angiography, QSM...
         # fl_r + 3d + 1: SWI?
-        if ('fl3d1r' in s.sequence_name):
+        if ('fl3d' in s.sequence_name):
             if ('ORIGINAL' in s.image_type[0].strip()):
-                info[angio].append(s.series_id)
-                continue
-            elif ('DERIVED' in s.image_type[0].strip()):
-                if ('MIP' in description):
+                if ('VESSEL' in description or 'ANGIO' in description):
+                    info[angio].append(s.series_id)
+                    continue
+                if ('T2STAR' in description):
+                    if ('MAG' in description):
+                        info[template_anat].append({'item': s.series_id, 'acq':'', 'part': '_part-mag', 'suffix': 'T2starw'})
+                        continue
+                    elif ('PHA' in description):
+                        info[template_anat].append({'item': s.series_id, 'acq':'', 'part': '_part-phase', 'suffix': 'T2starw'})
+                        continue
+                    elif ('QSM' in description):
+                        info[template_anat_derived].append({'item': s.series_id, 'acq':'QSM', 'part': '', 'suffix': 'T2starw'})
+                        continue
+                    elif ('SWI' in description and not 'MIP' in description):
+                        info[template_anat_derived].append({'item': s.series_id, 'acq':'SWI', 'part': '', 'suffix': 'T2starw'})
+                        continue
+            if ('DERIVED' in s.image_type[0].strip()):
+                if ('MIP' in s.image_type[2].strip()):
                     if ('COR' in description):
-                        info[angio_MIP].append({'item': s.series_id, 'acq': 'coronal'})
+                        info[template_anat_derived].append({'item': s.series_id, 'acq': 'coronal', 'part': '', 'suffix': 'MIP'})
                         continue
                     if ('SAG' in description):
-                        info[angio_MIP].append({'item': s.series_id, 'acq': 'sagittal'})
+                        info[template_anat_derived].append({'item': s.series_id, 'acq': 'sagittal', 'part': '', 'suffix': 'MIP'})
                         continue
-                  
+               
         info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
                   
         
@@ -325,7 +330,6 @@ def infotodict(seqinfo):
             info[flair].append(s.series_id)
             continue   
                 
-        info[extra].append({'item': s.series_id, 'acq': s.series_description})
     """
     
 
