@@ -124,6 +124,7 @@ def infotodict(seqinfo):
         # SWI-MIP combined...
         
         #ABCD
+        """
         if ('tfl_me3d1' in s.sequence_name):
             if ('MPR' in description):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MPRAGE', 'part': '', 'suffix': 'T1w'})
@@ -138,6 +139,7 @@ def infotodict(seqinfo):
                 elif ('T1' in description):
                     info[template_anat].append({'item': s.series_id, 'acq': '_acq-SPACE', 'part': '', 'suffix': 'T1w'})
                     continue
+        """
                 
         
         # Field Maps
@@ -306,19 +308,23 @@ def infotodict(seqinfo):
                         info[template_anat].append({'item': s.series_id, 'acq':'', 'part': '_part-phase', 'suffix': 'T2starw'})
                         continue
                     elif ('QSM' in description):
-                        info[template_anat_derived].append({'item': s.series_id, 'acq':'QSM', 'part': '', 'suffix': 'T2starw'})
+                        info[template_anat_derived].append({'item': s.series_id, 'acq':'_acq-QSM', 'part': '', 'suffix': 'T2starw'})
                         continue
-                    elif ('SWI' in description and not 'MIP' in description):
-                        info[template_anat_derived].append({'item': s.series_id, 'acq':'SWI', 'part': '', 'suffix': 'T2starw'})
+                    elif ('SWI' in s.image_type[2].strip()):
+                        info[template_anat_derived].append({'item': s.series_id, 'acq':'', 'part': '_part-SWI', 'suffix': 'T2starw'})
                         continue
             if ('DERIVED' in s.image_type[0].strip()):
                 if ('MIP' in s.image_type[2].strip()):
                     if ('COR' in description):
-                        info[template_anat_derived].append({'item': s.series_id, 'acq': 'coronal', 'part': '', 'suffix': 'MIP'})
+                        info[template_anat_derived].append({'item': s.series_id, 'acq': '_acq-coronal', 'part': '', 'suffix': 'MIP'})
                         continue
                     if ('SAG' in description):
-                        info[template_anat_derived].append({'item': s.series_id, 'acq': 'sagittal', 'part': '', 'suffix': 'MIP'})
+                        info[template_anat_derived].append({'item': s.series_id, 'acq': '_acq-sagittal', 'part': '', 'suffix': 'MIP'})
                         continue
+                elif ('SWI' in s.image_type[2].strip() and 'MINIMUM' in s.image_type[3].strip()):
+                    info[template_anat_derived].append({'item': s.series_id, 'acq': '', 'part':'_part-MIPSWI', 'suffix': 'T2starw'})
+                    continue
+                    
                
         info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
                   
