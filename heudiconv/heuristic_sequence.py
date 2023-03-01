@@ -2,8 +2,8 @@ import os
 
 #Intended for for fmaps
 POPULATE_INTENDED_FOR_OPTS = {
-    'matching_parameters': ['ImagingVolume', 'Shims'],
-    'criterion': 'Closest'
+    'matching_parameters': ['Force'],
+    'criterion': 'First'
 }
 
 # TEST, does it skip all setters?
@@ -184,7 +184,7 @@ def infotodict(seqinfo):
             elif (s.series_files == 1):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MPRAGE', 'part': '', 'suffix': 'T1w'})
                 continue
-            elif (s.series_files == 3):
+            elif (s.series_files == 3 or s.series_files == 192):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MP2RAGE', 'part': '', 'suffix': 'T1w'})
                 continue
             

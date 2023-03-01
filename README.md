@@ -19,7 +19,7 @@ https://heudiconv.readthedocs.io/en/latest/
 
 ### To get heudiconv (choose one):
 1. Latest official heudiconv: run `docker pull nipy/heudiconv:latest` in terminal.
-2. Our modified version:
+2. Our modified version:(XNAT ready in progress)
     Clone [this repository](https://github.com/845127818virna/heudiconv). Go into the cloned folder, use `docker build -t heudiconv .` to build a docker image called "heudiconv".
 
 Method1 for a single subject:
@@ -28,7 +28,8 @@ Method1 for a single subject:
 a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`\
 b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
 
-Note: Relative path from a base directory rather than absolute path is highly recommended. If you need to run heudiconv on the same data again, remove the existing output folder first.
+Note: If you need to run heudiconv on the same data again, remove the existing output folder first.
+Note: If you use a converter file already in the container heuristics folder, just use `-f <name>` and no need to put path to heuristic file.
 
 Method2 for a single subject using our version: (easier to use but less freedom)
 1. Get the heudiconv_test.sh from this repository and a converter file (available in ./heudiconv/).
@@ -37,7 +38,7 @@ Method2 for a single subject using our version: (easier to use but less freedom)
 
 ### heuristic files provided:
 - [heuristic_protocol.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_protocol.py): classification based on series description.
-- [heuristic_sequence.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_sequence.py): classification based on sequence name. Users need to modify the output BOLD file name on their own by replacing "taskName" with the actual task.
+- [heuristic_sequence.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_sequence.py): classification based on sequence name. Users need to modify the output BOLD file name on their own by replacing "taskName" with the actual task. 
 - [heuristic_sequence_bold.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_sequence_bold.py): classification based on sequence name. Users will be prompted to input the task name if fMRI data are present and the task will be in the output BOLD file name.
 
 ## MRIQC
