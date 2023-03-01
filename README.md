@@ -31,10 +31,10 @@ b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv --
 Note: If you need to run heudiconv on the same data again, remove the existing output folder first.
 Note: If you use a converter file already in the container heuristics folder, just use `-f <name>` and no need to put path to heuristic file.
 
-Method2 for a single subject using our version: (easier to use but less freedom)
-1. Get the heudiconv_test.sh from this repository and a converter file (available in ./heudiconv/).
-2. Put heudiconv_test.sh and the converter file in a base directory (base_dir). This base directory should be the parent directory of your project's dicom directory.
-3. When you are in the base directory, use `chmod u+x heudiconv_test.sh` to make the script executable. Then you can run heudiconv_test.sh with three arguments: the name of the dicom directory, the name of the converter file and the subject index (e.g., `./heudiconv_test.sh Yuexin_project heuristic_sequence.py 01`). The output will be have "BIDS" as suffix (e.g., ./Yuexin_project_BIDS).
+Method2 for a single subject using our heudiconv and converter file: (easier to use but less freedom)
+1. Get the heudiconv_test.sh from this repository.
+2. Put heudiconv_test.sh in a base directory (base_dir). This base directory should be the parent directory of your project's dicom directory.
+3. When you are in the base directory, use `chmod u+x heudiconv_test.sh` to make the script executable. Then you can run heudiconv_test.sh with two arguments: the name of the dicom directory and the subject index (e.g., `./heudiconv_test.sh Yuexin_project 01`). The output will be have "BIDS" as suffix (e.g., ./Yuexin_project_BIDS).
 
 ### heuristic files provided:
 - [heuristic_protocol.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_protocol.py): classification based on series description.

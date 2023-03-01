@@ -1,23 +1,20 @@
 #!/bin/bash
 
-# if number of arguments is not 3
-if [ $# -ne 3 ]
+# if number of arguments is not 2
+if [ $# -ne 2 ]
     then
-    echo "Three arguments are required:"
+    echo "Two arguments are required:"
     echo "1: name of the dicom directory (inputs)"
-    echo "2: name of the converter file"
-    echo "3: subject index"
-    echo "e.g., ./heudiconv_test.sh Yuexin_project heuristic_sequence.py 01"
+    echo "2: subject index"
+    echo "e.g., ./heudiconv_test.sh Yuexin_project 01"
     echo "Prerequisites:"
     echo "Docker and heudiconv (docker image) are installed/built"
-    echo "You should be in the parent directory of the dicom directory (and bids directory if exists)"
-    echo "The converter file is in this directory"
+    echo "You should cd to the parent directory of the dicom directory (and bids directory if exists)"
     exit 1
 fi
 
 dicom_dir=${1}
-converter=${2}
-isubject=${3}
+isubject=${2}
 
 # Must remove existing .heudiconv/ before another execution
 sudo rm -rf ./${dicom_dir}_BIDS/
@@ -49,5 +46,5 @@ docker run --rm -it -v ${PWD}:/base nipy/heudiconv:latest -d /base/${dicom_dir}/
 
 ## all in one folder command
 printf "\n Now processing ${dicom_dir} sub-${isubject} \n"
-docker run --rm -it -v ${PWD}:/base heudiconv --files /base/${dicom_dir}/sub-${isubject}/ -o /base/${dicom_dir}_BIDS/ -f /base/${converter} -s ${isubject} -c dcm2niix -b --overwrite --minmeta
+docker run --rm -it -v ${PWD}:/base heudiconv --files /base/${dicom_dir}/sub-${isubject}/ -o /base/${dicom_dir}_BIDS/ -f heuristic_sequence -s ${isubject} -c dcm2niix -b --overwrite --minmeta
 
