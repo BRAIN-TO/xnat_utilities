@@ -6,7 +6,6 @@ POPULATE_INTENDED_FOR_OPTS = {
     'criterion': 'First'
 }
 
-# TEST, does it skip all setters?
 dicoms2skip = ['localiser','setter','localizer', 'Head Scout']
 
 def filter_dicom(dcmdata):
@@ -141,8 +140,7 @@ def infotodict(seqinfo):
                 elif ('T1' in description):
                     info[template_anat].append({'item': s.series_id, 'acq': '_acq-SPACE', 'part': '', 'suffix': 'T1w'})
                     continue
-        """
-                
+        """       
         
         # Field Maps
         # fm_r + 2d + 2
@@ -181,14 +179,13 @@ def infotodict(seqinfo):
             elif ('3D-EDGE' in description):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-EDGE', 'part': '', 'suffix': 'T1w'})
                 continue
-            elif (s.series_files == 1):
+            elif (s.series_files == 1 or s.series_files == 192):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MPRAGE', 'part': '', 'suffix': 'T1w'})
                 continue
-            elif (s.series_files == 3 or s.series_files == 192):
+            elif (s.series_files == 3):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MP2RAGE', 'part': '', 'suffix': 'T1w'})
                 continue
             
-        
         # tir + 2d + 1
         if ('tir2d1' in s.sequence_name):
             info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
