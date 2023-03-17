@@ -36,8 +36,8 @@ def run_nipype_interface():
     res = topup.run()
 
     #fsl applytopup
-    applytopup = ApplyTOPUP(in_files = [image1], encoding_file = "acq_param.txt", in_topup_fieldcoef = "my_topup_fieldcoef.nii.gz", in_topup_movpar = "my_topup_movpar.txt", in_index = [1], method = 'jac')
-    res = applytopup.run()
+    #applytopup = ApplyTOPUP(in_files = [image1], encoding_file = "acq_param.txt", in_topup_fieldcoef = "my_topup_fieldcoef.nii.gz", in_topup_movpar = "my_topup_movpar.txt", in_index = [1], method = 'jac')
+    #res = applytopup.run()
 
     #fslmath to convert to radian
     fslmaths = BinaryMaths(in_file = "fieldmap_Hz.nii.gz", operation = 'mul', operand_value = 6.28, out_file = "fieldmap_radian.nii.gz")
@@ -81,9 +81,11 @@ def run_nipype_workflow():
     # create the processing workflow
     # connect the outputs to the inputs
     preprocessing = pe.Workflow(name="preprocesing")
-    preprocessing.connect(fslmerge, "merged_file", topup, "in_file")
-    preprocessing.connect(topup, "out_field", fslmaths, "in_file")
-    preprocessing.connect(fslmaths, "out_file", fugue, "fmap_in_file")
+    preprocessing.connect([
+        (fslmerge, topup, [('merged_file', 'in_file')]),
+        (topup, fslmaths, [('out_field', 'in_file')]),
+        (fslmaths, fugue, [('out_file', 'fmap_in_file')])
+    ])
 
     #datasource1
     datasource = pe.Node(
@@ -97,9 +99,11 @@ def run_nipype_workflow():
     datasource.inputs.template='%s'
 
     #connect preprocessing to datasource
-    preprocessing.connect(datasource, 'b0', fslmerge, 'in_files')
-    preprocessing.connect(datasource, 'acq_param', topup, 'encoding_file')
-    preprocessing.connect(datasource, 'image1', fugue, 'in_file')
+    preprocessing.connect([
+        (datasource, fslmerge, [('b0', 'in_files')]),
+        (datasource, topup, [('acq_param', 'encoding_file')]),
+        (datasource, fugue, [('image1', 'in_file')])
+    ])
 
     #connect datasink to preprocessing
     datasink = pe.Node(interface=nio.DataSink(), name="datasink")
