@@ -32,6 +32,7 @@ def infotodict(seqinfo):
     """
     
     #20221122 Yuexin Xi - bug: keyerror for extra - fixed: add key-value pair in all cases of extra
+    #20230327 Yuexin Xi - bug: 'dir' should be put after task according to BIDS - fixed
     
     # MPRAGE, FGATIR, EDGE3D, WAIR, STIR, SPACE
     template_anat = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}{acq}_run-{item:02d}{part}_{suffix}')
@@ -41,8 +42,8 @@ def infotodict(seqinfo):
     #flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
     
     # BOLD
-    template_func = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_{suffix}')
-    epi = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}{dir}_task-taskName_run-{item:02d}_epi')
+    template_func = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_task-taskName{dir}_run-{item:02d}_{suffix}')
+    epi = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_task-taskName{dir}_run-{item:02d}_epi')
     
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_asl')
