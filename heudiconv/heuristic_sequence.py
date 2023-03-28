@@ -60,7 +60,7 @@ def infotodict(seqinfo):
     fmap_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_magnitude')
     
     # MEGRE
-    # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images -> check results whether it says 1 and 2
+    # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images
     # fl2d2 - fieldmap in names -> anat/..._MEGRE.nii
     fmap_megre_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_magnitude')
     fmap_megre_phase = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_phase')
