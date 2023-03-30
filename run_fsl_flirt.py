@@ -30,22 +30,21 @@ def run_fsl_flirt(in_file, reference, wm_seg, fieldmap, cost_function, schedule,
     flt.inputs.no_search = nosearch_resample_sample
     flt.inputs.no_resample = nosearch_resample_sample
     flt.inputs.no_resample_blur = nosearch_resample_sample
-    flt.inputs.out_matrix_file = in_file.split(".")[0] + "_flirt.mat"
     if in_matrix_file:
-        flt.inputs.in_matrix_file = in_file.split(".")[0] + "_flirt.mat"
+        flt.inputs.in_matrix_file = in_file.replace('.nii.gz', '') + "_flirt.mat"
     print(f"\nProcessing\n{flt.cmdline}\n")
     res = flt.run()
     
 def run_fsl_epi_reg(in_file, reference, wm_seg, fieldmap):
     epireg = fsl.EpiReg(epi = in_file, t1_head = reference)
-    btr = fsl.BET(in_file = reference, out_file = reference.split(".")[0] + "_brain.nii.gz")
+    btr = fsl.BET(in_file = reference, out_file = reference.replace('.nii.gz', '') + "_brain.nii.gz")
     print(f"\nProcessing\n{btr.cmdline}\n")
     btr.run()
-    epireg.inputs.t1_brain = reference.split(".")[0] + "_brain.nii.gz"
+    epireg.inputs.t1_brain = reference.replace('.nii.gz', '') + "_brain.nii.gz"
     epireg.inputs.wmseg = wm_seg
     if fieldmap != 'nofieldmap':
         epireg.inputs.fmap = fieldmap
-    epireg.inputs.out_base = in_file.split(".")[0]
+    epireg.inputs.out_base = in_file.replace('.nii.gz', '') + "_epireg"
     print(f"\nProcessing\n{epireg.cmdline}\n")
     res = epireg.run()
 
@@ -55,4 +54,4 @@ bbrschedule = os.path.join(FSLDIR, 'etc/flirtsch/bbr.sch')
 
 run_fsl_flirt(in_file, reference, wm_seg, fieldmap, cost_function='normmi', schedule ='', nosearch_resample_sample = True, in_matrix_file = False)
 run_fsl_flirt(in_file, reference, wm_seg, fieldmap, cost_function='bbr', schedule = bbrschedule, nosearch_resample_sample = False, in_matrix_file = True)
-run_fsl_epi_reg(in_file, reference, wm_seg, fieldmap) 
+#run_fsl_epi_reg(in_file, reference, wm_seg, fieldmap) 
