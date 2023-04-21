@@ -32,6 +32,9 @@ def run_fsl_flirt(in_file, reference, wm_seg, fieldmap, cost_function, schedule,
     flt.inputs.no_resample_blur = nosearch_resample_sample
     if in_matrix_file:
         flt.inputs.in_matrix_file = in_file.replace('.nii.gz', '') + "_flirt.mat"
+    else:
+        flt.inputs.out_matrix_file = in_file.replace('.nii.gz', '') + "_flirt.mat"
+    flt.inputs.out_file = in_file.replace('.nii.gz', '') + "_flirt.nii.gz"
     print(f"\nProcessing\n{flt.cmdline}\n")
     res = flt.run()
     
