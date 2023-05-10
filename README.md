@@ -64,11 +64,22 @@ Note:\
 ## TOPUP
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
 
-1. Two images of opposite encoding direction and their corresponding metadata json files are required. Make sure the "AcquisitionMatrixPE" and "EffectiveEchoSpacing" fields are available.
+1. Two images of opposite phase encoding direction and their corresponding metadata json files are required. Make sure the "AcquisitionMatrixPE" and "EffectiveEchoSpacing" fields are available.
 2. Get nipype using [docker, conda or Pypi](https://nipype.readthedocs.io/en/latest/users/install.html) or set up [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation). Virtual environment recommended.
 2. Get the script and put it in the same folder as the data.
 3. run `python run_fsl_topup.py <file_to_correct> <file_reverse_direction>` according to your preferred python version.
 4. The results will either be in the current directory or in a new directory ./output/contrasts/ depending on the method chosen.
 
 ### scripts provided:
-- [run_fsl_topup.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/run_fsl_topup.py): takes filenames and run FSL TOPUP and FUGUE to generate the distortion corrected image. You can choose from "run_nipype_interface()", "run_nipype_workflow()", or "run_command()". ApplyTOPUP is also available in run_nipype_interface()
+- [run_fsl_topup.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/run_fsl_topup.py): takes images of opposite phase encoding direction and run FSL TOPUP and FUGUE to generate the distortion corrected image. You can choose from "run_nipype_interface()", "run_nipype_workflow()", or "run_command()". ApplyTOPUP is also available in run_nipype_interface()
+
+## FLIRT
+https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT
+
+1. The functional image, the reference anatomical image, the white matter sementation are required. fieldmap is optional.
+2. Get nipype using [docker, conda or Pypi](https://nipype.readthedocs.io/en/latest/users/install.html). Virtual environment recommended.
+3. run `python run_fsl_flirt.py <in_file> <ref_file> <wm_seg> <fmap_file>` or `python run_fsl_flirt.py <in_file> <ref_file> <wm_seg> nofieldmap` if no fieldmap available.
+4. The result will be in the same directory as the input image.
+
+### scripts provided:
+- [run_fsl_flirt.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/run_fsl_flirt.py): takes functional image, reference anatomical image, white matter segmentation and a fieldmap to run FSL FLIRT with BBR cost function to generated the registered image using gray/white matter boundary. This is the same method as what fMRIPrep uses (by 23.0.2).
