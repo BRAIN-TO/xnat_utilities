@@ -143,7 +143,7 @@ def infotodict(seqinfo):
                     continue
         """       
         
-        # Field Maps
+        # Field Maps, phasediff
         # fm_r + 2d + 2
         if ('fm2d2r' in s.sequence_name):
             if('P' in (s.image_type[2].strip()) ):
@@ -153,7 +153,7 @@ def infotodict(seqinfo):
                 info[fmap_magnitude].append(s.series_id)
                 continue
 
-        # MEGRE
+        # MEGRE, two phases images
         # fl + 2d + 2
         # qfl + 3d + 4
         if ('fl2d2' in s.sequence_name or \
@@ -186,15 +186,15 @@ def infotodict(seqinfo):
             elif (s.series_files == 3):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MP2RAGE', 'part': '', 'suffix': 'T1w'})
                 continue
-            
-        # tir + 2d + 1
-        if ('tir2d1' in s.sequence_name):
-            info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
-            continue
         
         # tir_rr + 2d + 1
         if ('tir2d1rr' in s.sequence_name):
             info[template_anat].append({'item': s.series_id, 'acq': '_acq-STIR', 'part': '', 'suffix': 'T2w'})
+            continue
+            
+        # tir + 2d + 1, dark fluid flair?
+        if ('tir2d1' in s.sequence_name):
+            info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
             continue
         
         # hippocampus

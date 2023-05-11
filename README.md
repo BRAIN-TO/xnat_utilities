@@ -1,7 +1,7 @@
 # xnat_utilities
 Code base for XNAT applications \
 Instructions are based on Ubuntu 20.04.5 LTS \
-Remember to change every field with <> below according to your own directory structure. 
+Remember to change every field with <> below according to your own situation. 
 
 
 ## Prerequisite
@@ -49,17 +49,18 @@ https://mriqc.readthedocs.io/en/latest/
 3. For a single subject: `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out nipreps/mriqc:latest /data /out participant --participant_label <subject_folder_name>`
 
 ## fMRIPrep
-https://fmriprep.org/en/stable/
+https://fmriprep.org/en/stable/ \
+[Our copy of 23.0.2 with FAQ](https://github.com/845127818virna/fmriprep)
 
-1. Data have to be in BIDS. You can validate your data with the [validator](http://incf.github.io/bids-validator/). Normally, no error or warning should be present for fMRIPrep to run properly (otherwise use `--skip_bids_validation` flag as below).
-2. Get the docker image with `docker pull nipreps/fmriprep:latest`
+1. Data have to be in BIDS. You can validate your data with the [validator](http://incf.github.io/bids-validator/). Normally, no error or warning should be present for fMRIPrep to run properly (otherwise use `--skip_bids_validation`).
+2. Run `docker pull nipreps/fmriprep:latest` to get the latest docker image or `docker pull nipreps/fmriprep:<version>`
 3. Obtain Freesurfer software and its license.txt.
-3. `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out -v <freesurfer_license_path>:/opt/freesurfer/license.txt nipreps/fmriprep:latest /data /out participant --skip_bids_validation --fs-no-reconall --md-only-boilerplate --output-spaces T1w`
+3. `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out -v <freesurfer_license_path>:/opt/freesurfer/license.txt nipreps/fmriprep:latest /data /out participant --fs-no-reconall --md-only-boilerplate --output-spaces T1w`
 
 Note:\
 `--fs-no-reconall` = skip surface reconstruction\
 `--md-only-boilerplate` = skip generation of citation with pandoc\
-`--output-spaces T1w` = skip normalization to MNI space
+`--output-spaces T1w` = register images to anatomical space (default is normalization to MNI space)
 
 ## TOPUP
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
@@ -76,7 +77,7 @@ https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
 ## FLIRT
 https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT
 
-1. The functional image, the reference anatomical image, the white matter sementation are required. fieldmap is optional.
+1. The functional image, the reference anatomical image, the white matter sementation are required. Fieldmap is optional.
 2. Get nipype using [docker, conda or Pypi](https://nipype.readthedocs.io/en/latest/users/install.html). Virtual environment recommended.
 3. run `python run_fsl_flirt.py <in_file> <ref_file> <wm_seg> <fmap_file>` or `python run_fsl_flirt.py <in_file> <ref_file> <wm_seg> nofieldmap` if no fieldmap available.
 4. The result will be in the same directory as the input image.
