@@ -3,7 +3,7 @@ import os
 #Intended for for fmaps
 POPULATE_INTENDED_FOR_OPTS = {
     'matching_parameters': ['Force'],
-    'criterion': 'First'
+    'criterion': 'Closest'
 }
 
 dicoms2skip = ['localiser','setter','localizer', 'Head Scout']
@@ -109,8 +109,8 @@ def infotodict(seqinfo):
         * dim2
         * dim3
         * dim4
-        * TR
-        * TE
+        * TR (in s)
+        * TE (in ms)
         * protocol_name
         * is_motion_corrected
         * is_derived
@@ -121,6 +121,7 @@ def infotodict(seqinfo):
         * series_files
         * image_type
         * sequence_name
+        * TI (in ms)
         """
         
         description = (s.series_description + '_' + s.protocol_name).strip().upper()
@@ -192,9 +193,12 @@ def infotodict(seqinfo):
             info[template_anat].append({'item': s.series_id, 'acq': '_acq-STIR', 'part': '', 'suffix': 'T2w'})
             continue
             
-        # tir + 2d + 1, dark fluid flair?
+        # tir + 2d + 1, threshold is TI of grey matter at 3T
         if ('tir2d1' in s.sequence_name):
-            info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
+            if (s.TI > 918):
+                info[template_anat].append({'item': s.series_id, 'acq': '', 'part': '', 'suffix': 'FLAIR'})
+            elif (s.TI <= 918):
+                info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
             continue
         
         # hippocampus
