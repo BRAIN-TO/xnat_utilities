@@ -193,11 +193,11 @@ def infotodict(seqinfo):
             info[template_anat].append({'item': s.series_id, 'acq': '_acq-STIR', 'part': '', 'suffix': 'T2w'})
             continue
             
-        # tir + 2d + 1, threshold is TI of grey matter at 3T
+        # tir + 2d + 1, threshold is TI_null of grey matter at 3T
         if ('tir2d1' in s.sequence_name):
-            if (s.TI > 918):
+            if (s.TI > 918 or "FLAIR" in description):
                 info[template_anat].append({'item': s.series_id, 'acq': '', 'part': '', 'suffix': 'FLAIR'})
-            elif (s.TI <= 918):
+            elif (s.TI <= 918 or "WAIR" in description):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
             continue
         
