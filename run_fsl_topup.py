@@ -1,3 +1,22 @@
+"""
+--------------------------------------------------------------------------------
+This script performs distortion correction of functional image with topup method
+(You should have two images with opposite PE directions) through either
+1. nipype FSL interface
+2. nipype workflow
+3. FSL
+--------------------------------------------------------------------------------
+Required arguments:
+    file1           : bold image1
+    file2           : bold image2 with PE direction opposite to file1
+    unwarp direction: the direction of file1, flip if output does not look correct
+                        (x,x-,y,y-,z,z-)
+--------------------------------------------------------------------------------
+Script created by   : Yuexin Xi (2023), yuexinxi0220@outlook.com
+--------------------------------------------------------------------------------
+
+"""
+
 import nipype.interfaces.io as nio  # Data i/o
 from nipype.interfaces.fsl.epi import TOPUP, ApplyTOPUP
 from nipype.interfaces.fsl.preprocess import FUGUE
@@ -11,7 +30,7 @@ import json
 import subprocess
 import os
 
-script, file1, file2 = argv
+script, file1, file2, unw_dir = argv
 
 def prepare_parameter_file(c):
     #create the parameter file with C4
@@ -44,7 +63,7 @@ def run_nipype_interface():
     res = fslmaths.run()
     
     #fsl fugue
-    fugue = FUGUE(in_file = image1, dwell_time = value1, fmap_in_file = "fieldmap_radian.nii.gz", unwarped_file = f"{file1}_corrected.nii.gz", unwarp_direction = "y-", save_shift = True)
+    fugue = FUGUE(in_file = image1, dwell_time = value1, fmap_in_file = "fieldmap_radian.nii.gz", unwarped_file = f"{file1}_corrected.nii.gz", unwarp_direction = unw_dir, save_shift = True)
     res = fugue.run()
 
 def run_nipype_workflow():
@@ -75,7 +94,7 @@ def run_nipype_workflow():
     fugue = pe.Node(interface=FUGUE(), name="fugue")
     fugue.inputs.dwell_time = value1
     fugue.inputs.unwarped_file = f"{image1}_corrected.nii.gz"
-    fugue.inputs.unwarp_direction = "y-"
+    fugue.inputs.unwarp_direction = unw_dir
     fugue.inputs.save_shift = True
 
     # create the processing workflow
@@ -129,7 +148,7 @@ def run_command():
     subprocess.run(["fslmaths", "fieldmap_Hz.nii.gz", "-mul", "6.28", "fieldmap_radian.nii.gz"])
     
     #fsl fugue
-    subprocess.run(["fugue", "-i", image1, f"--dwell={value1}", "--loadfmap=fieldmap_radian.nii.gz", "-u", f"{file1}_corrected.nii.gz", "--unwarpdir=y-", "--saveshift=my_shift"])
+    subprocess.run(["fugue", "-i", image1, f"--dwell={value1}", "--loadfmap=fieldmap_radian.nii.gz", "-u", f"{file1}_corrected.nii.gz", f"--unwarpdir={unw_dir}", "--saveshift=my_shift"])
 
 #define file names
 json1 = file1.split(".")[0] + ".json"

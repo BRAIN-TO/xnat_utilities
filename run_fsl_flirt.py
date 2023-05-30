@@ -1,3 +1,20 @@
+"""
+--------------------------------------------------------------------------------
+This script performs registration of functional image to anatomical image based 
+on boundary based registration dependent on nipype
+--------------------------------------------------------------------------------
+Required arguments:
+    in_file         : input bold image
+    reference       : reference anatomical image  
+    wm_seg          : white matter segmentation
+Optional arguments:
+    fieldmap        : fieldmap file or use "nofieldmap"
+--------------------------------------------------------------------------------
+Script created by   : Yuexin Xi (2023), yuexinxi0220@outlook.com
+--------------------------------------------------------------------------------
+
+"""
+
 import os
 import os.path as op
 
