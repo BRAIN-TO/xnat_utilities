@@ -1,7 +1,7 @@
 """
 --------------------------------------------------------------------------------
 This script performs registration of functional image to anatomical image based 
-on boundary based registration dependent on nipype
+on boundary based registration
 --------------------------------------------------------------------------------
 Required arguments:
     in_file         : input bold image
@@ -11,6 +11,7 @@ Optional arguments:
     fieldmap        : fieldmap file or use "nofieldmap"
 --------------------------------------------------------------------------------
 Script created by   : Yuexin Xi (2023), yuexinxi0220@outlook.com
+Dependencies        : Nipype, niworkflows
 --------------------------------------------------------------------------------
 
 """

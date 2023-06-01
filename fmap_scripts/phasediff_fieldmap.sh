@@ -20,9 +20,8 @@ Required arguments:
 Optional arguments:
     --dte   : delta TE                  ( default: 3.75 ms )  
 --------------------------------------------------------------------------------
-Original Script created by  : S Kashyap (08-2022), kashyap.sriranga@gmail.com
-Modified by                 : Yuexin Xi (05-2023), yuexinxi0220@outlook.com
-    to provide BIDS valid fmap filename and json file (dependent on jq)
+Script created by           : Yuexin Xi (05-2023), yuexinxi0220@outlook.com
+Dependencies                : SynthStrip (available in FreeSurfer), FSL, jq
 Learn more                  : https://jqlang.github.io/jq/
 Learn more                  : https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide
 --------------------------------------------------------------------------------
