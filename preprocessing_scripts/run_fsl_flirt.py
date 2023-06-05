@@ -11,7 +11,7 @@ Optional arguments:
     fieldmap        : fieldmap file or use "nofieldmap"
 --------------------------------------------------------------------------------
 Script created by   : Yuexin Xi (2023), yuexinxi0220@outlook.com
-Dependencies        : Nipype, niworkflows
+Dependencies        : Nipype
 --------------------------------------------------------------------------------
 
 """
@@ -23,9 +23,6 @@ import pkg_resources as pkgr
 from nipype.interfaces import fsl
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
-
-from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-
 from sys import argv
 
 script, in_file, reference, wm_seg, fieldmap = argv

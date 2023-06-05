@@ -19,17 +19,22 @@ https://heudiconv.readthedocs.io/en/latest/
 
 ### To get heudiconv (choose one):
 1. Latest official heudiconv: run `docker pull nipy/heudiconv:latest` in terminal.
-2. Our modified version:(XNAT ready in progress)
-    Clone [this repository](https://github.com/845127818virna/heudiconv). Go into the cloned folder, use `docker build -t heudiconv .` to build a docker image called "heudiconv".
+2. Our modified version (XNAT ready): run `docker pull yuexinxi/heudiconv:latest` in terminal.
 
 Method1 for a single subject:
-1. Get a converter file (available in ./heudiconv/).
-2. Use one of the following command. \
-a. If you use the official version: `docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`\
-b. If you use our version: `docker run --rm -it -v <base_dir>:/base heudiconv --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta`
+1. Get a converter file.
+2. Use one of the following command.\
+If you use the official version: 
+```
+docker run --rm -it -v <base_dir>:/base nipy/heudiconv:latest --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta
+```
+If you use our version: 
+```
+docker run --rm -it -v <base_dir>:/base yuexinxi/heudiconv:latest --files /base/<dicoms_dir>/ -o /base/<bids_dir>/ -f /base/<heuristic_file> -s <subject_index> -c dcm2niix -b --overwrite --minmeta
+```
 
-Note: If you need to run heudiconv on the same data again, remove the existing output folder first.
-Note: If you use a converter file already in the container heuristics folder, just use `-f <name>` and no need to put path to heuristic file.
+Note: If you need to run heudiconv on the same data again, remove the existing output folder first. \
+Note: To use a converter file already in the container heuristics folder, just use the name (e.g. `-f heuristic_sequence`)
 
 Method2 for a single subject using our heudiconv and converter file: (easier to use but less freedom)
 1. Get the heudiconv_test.sh from this repository.
@@ -46,7 +51,10 @@ https://mriqc.readthedocs.io/en/latest/
 
 1. Data have to be in BIDS. You can validate your data with the [validator](http://incf.github.io/bids-validator/). Some valid key labels may not be accepted by the validator but will not affect the overall performance of MRIQC.
 2. To see whether mriqc works properly, use `docker run -it nipreps/mriqc:latest --version` to check the version.
-3. For a single subject: `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out nipreps/mriqc:latest /data /out participant --participant_label <subject_folder_name>`
+3. For a single subject: 
+```
+docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out nipreps/mriqc:latest /data /out participant --participant_label <subject_folder_name>
+```
 
 ## fMRIPrep
 https://fmriprep.org/en/stable/ \
@@ -55,32 +63,45 @@ https://fmriprep.org/en/stable/ \
 1. Data have to be in BIDS. You can validate your data with the [validator](http://incf.github.io/bids-validator/). Normally, no error or warning should be present for fMRIPrep to run properly (otherwise use `--skip_bids_validation`).
 2. Run `docker pull nipreps/fmriprep:latest` to get the latest docker image or `docker pull nipreps/fmriprep:<version>`
 3. Obtain Freesurfer software and its license.txt.
-3. `docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out -v <freesurfer_license_path>:/opt/freesurfer/license.txt nipreps/fmriprep:latest /data /out participant --fs-no-reconall --md-only-boilerplate --output-spaces T1w`
+4.
+```
+docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out -v <freesurfer_license_path>:/opt/freesurfer/license.txt nipreps/fmriprep:latest /data /out participant --fs-no-reconall --md-only-boilerplate --output-spaces T1w
+```
 
 Note:\
 `--fs-no-reconall` = skip surface reconstruction\
 `--md-only-boilerplate` = skip generation of citation with pandoc\
 `--output-spaces T1w` = register images to anatomical space (default is normalization to MNI space)
 
-## TOPUP
-https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup
+## Preprocessing_scripts
+### bto_dualecho_fieldmap.sh
+- This script takes the following arguments: 1st echo magnitude image, 2nd echo magnitude image, 1st echo phase image, 2nd echo phase image and delta TE (optional) to generate the fieldmap and json file in BIDS specification.
+- Dependencies: [Synthstrip](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/), [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [jq](https://jqlang.github.io/jq/)
+- Example:
+```
+bto_dualecho_fieldmap.sh --mag1=sub-01_ses-01_acq-GRE_run-1_echo-1_part-mag_T2starw.nii.gz --mag2=sub-01_ses-01_acq-GRE_run-1_echo-2_part-mag_T2starw.nii.gz --phs1=sub-01_ses-01_acq-GRE_run-1_echo-1_part-phase_T2starw.nii.gz --phs2=sub-01_ses-01_acq-GRE_run-1_echo-2_part-phase_T2starw.nii.gz --dte=2.46
+```
 
-1. Two images of opposite phase encoding direction and their corresponding metadata json files are required. Make sure the "AcquisitionMatrixPE" and "EffectiveEchoSpacing" fields are available.
-2. Get nipype using [docker, conda or Pypi](https://nipype.readthedocs.io/en/latest/users/install.html) or set up [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation). Virtual environment recommended.
-2. Get the script and put it in the same folder as the data.
-3. run `python run_fsl_topup.py <file_to_correct> <file_reverse_direction>` according to your preferred python version.
-4. The results will either be in the current directory or in a new directory ./output/contrasts/ depending on the method chosen.
+### phasediff_fieldmap.sh
+- This script takes the following arguments: 1st echo magnitude image, 2nd echo magnitude image, phasediff image and delta TE (optional) to generate the fieldmap and json file in BIDS specification.
+- Dependencies: [Synthstrip](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/), [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation), [jq](https://jqlang.github.io/jq/)
+- Example: 
+```
+phasediff_fieldmap.sh --mag1=sub-01_ses-01_acq-GRE_run-1_echo-1_magnitude1.nii.gz --mag2=sub-01_ses-01_acq-GRE_run-1_echo-2_magnitude2.nii.gz --phs=sub-01_ses-01_acq-GRE_run-1_echo-1_phasediff.nii.gz --dte=2.46
+```
 
-### scripts provided:
-- [run_fsl_topup.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/run_fsl_topup.py): takes images of opposite phase encoding direction and run FSL TOPUP and FUGUE to generate the distortion corrected image. You can choose from "run_nipype_interface()", "run_nipype_workflow()", or "run_command()". ApplyTOPUP is also available in run_nipype_interface()
+### run_fsl_flirt.py
+- This script takes the following arguments: functional image, reference anatomical image, white matter sementation and fieldmap (optional) to perform registration of functional image to anatomical image based on boundary based registration. This is the same method as what fMRIPrep uses (by 23.0.2).
+- Dependencies: [nipype](https://nipype.readthedocs.io/en/latest/users/install.html)
+- Example:
+```
+python run_fsl_flirt.py sub-01_ses-01_task-rest_run-01_bold.nii.gz sub-01_acq-MPRAGE_run-01_T1w.nii.gz sub-01_acq-MPRAGE_run-03_label-WM_probseg.nii.gz nofieldmap
+```
 
-## FLIRT
-https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT
-
-1. The functional image, the reference anatomical image, the white matter sementation are required. Fieldmap is optional.
-2. Get nipype using [docker, conda or Pypi](https://nipype.readthedocs.io/en/latest/users/install.html). Virtual environment recommended.
-3. run `python run_fsl_flirt.py <in_file> <ref_file> <wm_seg> <fmap_file>` or `python run_fsl_flirt.py <in_file> <ref_file> <wm_seg> nofieldmap` if no fieldmap available.
-4. The result will be in the same directory as the input image.
-
-### scripts provided:
-- [run_fsl_flirt.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/run_fsl_flirt.py): takes functional image, reference anatomical image, white matter segmentation and a fieldmap to run FSL FLIRT with BBR cost function to generated the registered image using gray/white matter boundary. This is the same method as what fMRIPrep uses (by 23.0.2).
+### run_fsl_topup
+- This script takes the following arguments: two functional images of opposite phase encoding direction (with their metadata json files. Make sure the "AcquisitionMatrixPE" and "EffectiveEchoSpacing" fields are available) and the unwarp direction to perform distortion correction of functional image with topup method. The results will either be in the current directory or in a new directory ./output/contrasts/ depending on the method chosen.
+- Dependencies: [nipype](https://nipype.readthedocs.io/en/latest/users/install.html) or [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
+- Example:
+```
+python run_fsl_topup.py sub-01_ses-01_task-rest_dir-AP_bold.nii.gz sub-01_ses-01_task-rest_dir-PA_bold.nii.gz y-
+```

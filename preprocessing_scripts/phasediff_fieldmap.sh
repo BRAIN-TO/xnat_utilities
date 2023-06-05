@@ -16,7 +16,7 @@ $(basename $0) ${bold}--mag1${normal}=Magnitude 1 ${bold}--mag2${normal}=Magnitu
 Required arguments:
     --mag1  : 1st echo magnitude image  ( e.g. /path/to/source/sub-01_magnitude1.nii.gz )
     --mag2  : 2nd echo magnitude image  ( e.g. /path/to/source/sub-01_magnitude2.nii.gz )
-    --phs  : phasediff image            ( e.g. /path/to/source/sub-01_phasediff.nii.gz )
+    --phs   : phasediff image            ( e.g. /path/to/source/sub-01_phasediff.nii.gz )
 Optional arguments:
     --dte   : delta TE                  ( default: 3.75 ms )  
 --------------------------------------------------------------------------------
