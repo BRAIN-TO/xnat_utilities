@@ -125,7 +125,7 @@ def infotodict(seqinfo):
         """
         
         description = (s.series_description + '_' + s.protocol_name).strip().upper()
-    
+        
         #ABCD
         """
         if ('tfl_me3d1' in s.sequence_name):
@@ -192,7 +192,7 @@ def infotodict(seqinfo):
         if ('tir2d1rr' in s.sequence_name):
             info[template_anat].append({'item': s.series_id, 'acq': '_acq-STIR', 'part': '', 'suffix': 'T2w'})
             continue
-            
+
         # tir + 2d + 1, threshold is TI_null of grey matter at 3T
         if ('tir2d1' in s.sequence_name):
             if (s.TI > 918 or "FLAIR" in description):
@@ -220,7 +220,7 @@ def infotodict(seqinfo):
                     continue
                 elif ('T1' in description):
                     info[template_anat].append({'item': s.series_id, 'acq': '_acq-SPACE', 'part': '', 'suffix': 'T1w'})
-                    continue  
+                    continue
         
         # BOLD
         # epfid + 2d
@@ -243,7 +243,6 @@ def infotodict(seqinfo):
             info[template_func].append(myItem)
             continue
                       
-                        
         # Perfusion
         # tgse + 3d + 1
         if ('ASL' in s.image_type[2].strip() or \
@@ -330,7 +329,6 @@ def infotodict(seqinfo):
                     
                
         info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
-                  
         
         """
             
@@ -338,7 +336,7 @@ def infotodict(seqinfo):
         if ('FLAIR' in description or ('DA' in description and 'FL' in description)):
             info[flair].append(s.series_id)
             continue   
-                
+    
     """
     
 

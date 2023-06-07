@@ -98,7 +98,7 @@ phasediff_fieldmap.sh --mag1=sub-01_ses-01_acq-GRE_run-1_echo-1_magnitude1.nii.g
 python run_fsl_flirt.py sub-01_ses-01_task-rest_run-01_bold.nii.gz sub-01_acq-MPRAGE_run-01_T1w.nii.gz sub-01_acq-MPRAGE_run-03_label-WM_probseg.nii.gz nofieldmap
 ```
 
-### run_fsl_topup
+### run_fsl_topup.py
 - This script takes the following arguments: two functional images of opposite phase encoding direction (with their metadata json files. Make sure the "AcquisitionMatrixPE" and "EffectiveEchoSpacing" fields are available) and the unwarp direction to perform distortion correction of functional image with topup method. The results will either be in the current directory or in a new directory ./output/contrasts/ depending on the method chosen.
 - Dependencies: [nipype](https://nipype.readthedocs.io/en/latest/users/install.html) or [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
 - Example:

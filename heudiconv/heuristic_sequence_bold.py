@@ -3,7 +3,7 @@ import os
 #Intended for for fmaps
 POPULATE_INTENDED_FOR_OPTS = {
     'matching_parameters': ['Force'],
-    'criterion': 'First'
+    'criterion': 'Closest'
 }
 
 dicoms2skip = ['localiser','setter','localizer', 'Head Scout']
@@ -32,6 +32,7 @@ def infotodict(seqinfo):
     """
     
     #20221122 Yuexin Xi - bug: keyerror for extra - fixed: add key-value pair in all cases of extra
+    #20230327 Yuexin Xi - bug: 'dir' should be put after task according to BIDS - fixed
     
     # MPRAGE, FGATIR, EDGE3D, WAIR, STIR, SPACE
     template_anat = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}{acq}_run-{item:02d}{part}_{suffix}')
@@ -41,8 +42,8 @@ def infotodict(seqinfo):
     #flair = create_key('{bids_subject_session_dir}/anat/{bids_subject_session_prefix}_run-{item:02d}_FLAIR')
     
     # BOLD
-    template_func = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}{dir}_task-{task}_run-{item:02d}_{suffix}')
-    epi = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}{dir}_task-{task}_run-{item:02d}_epi')
+    template_func = create_key('{bids_subject_session_dir}/func/{bids_subject_session_prefix}_task-{task}{dir}_run-{item:02d}_{suffix}')
+    epi = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_task-{task}{dir}_run-{item:02d}_epi')
     
     # Perfusion
     asl = create_key('{bids_subject_session_dir}/perf/{bids_subject_session_prefix}{dir}_run-{item:02d}_asl')
@@ -59,7 +60,7 @@ def infotodict(seqinfo):
     fmap_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_magnitude')
     
     # MEGRE
-    # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images -> check results whether it says 1 and 2
+    # fl2d2 + fieldmap in names -> fmap/two phase maps and two magnitude images
     # fl2d2 - fieldmap in names -> anat/..._MEGRE.nii
     fmap_megre_magnitude = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_magnitude')
     fmap_megre_phase = create_key('{bids_subject_session_dir}/fmap/{bids_subject_session_prefix}_acq-MEGRE_phase')
@@ -108,8 +109,8 @@ def infotodict(seqinfo):
         * dim2
         * dim3
         * dim4
-        * TR
-        * TE
+        * TR (in s)
+        * TE (in ms)
         * protocol_name
         * is_motion_corrected
         * is_derived
@@ -120,6 +121,7 @@ def infotodict(seqinfo):
         * series_files
         * image_type
         * sequence_name
+        * TI (in ms)
         """
         
         description = (s.series_description + '_' + s.protocol_name).strip().upper()
@@ -142,7 +144,7 @@ def infotodict(seqinfo):
                     continue
         """       
         
-        # Field Maps
+        # Field Maps, phasediff
         # fm_r + 2d + 2
         if ('fm2d2r' in s.sequence_name):
             if('P' in (s.image_type[2].strip()) ):
@@ -152,7 +154,7 @@ def infotodict(seqinfo):
                 info[fmap_magnitude].append(s.series_id)
                 continue
 
-        # MEGRE
+        # MEGRE, two phases images
         # fl + 2d + 2
         # qfl + 3d + 4
         if ('fl2d2' in s.sequence_name or \
@@ -185,15 +187,18 @@ def infotodict(seqinfo):
             elif (s.series_files == 3):
                 info[template_anat].append({'item': s.series_id, 'acq': '_acq-MP2RAGE', 'part': '', 'suffix': 'T1w'})
                 continue
-              
-        # tir + 2d + 1
-        if ('tir2d1' in s.sequence_name):
-            info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
-            continue
         
         # tir_rr + 2d + 1
         if ('tir2d1rr' in s.sequence_name):
             info[template_anat].append({'item': s.series_id, 'acq': '_acq-STIR', 'part': '', 'suffix': 'T2w'})
+            continue
+
+        # tir + 2d + 1, threshold is TI_null of grey matter at 3T
+        if ('tir2d1' in s.sequence_name):
+            if (s.TI > 918 or "FLAIR" in description):
+                info[template_anat].append({'item': s.series_id, 'acq': '', 'part': '', 'suffix': 'FLAIR'})
+            elif (s.TI <= 918 or "WAIR" in description):
+                info[template_anat].append({'item': s.series_id, 'acq': '_acq-WAIR', 'part': '', 'suffix': 'T2w'})
             continue
         
         # hippocampus
@@ -215,7 +220,7 @@ def infotodict(seqinfo):
                     continue
                 elif ('T1' in description):
                     info[template_anat].append({'item': s.series_id, 'acq': '_acq-SPACE', 'part': '', 'suffix': 'T1w'})
-                    continue 
+                    continue
         
         # BOLD
         # epfid + 2d
@@ -325,7 +330,6 @@ def infotodict(seqinfo):
                     
                
         info[extra].append({'item': s.series_id, 'acq': s.sequence_name, 'des': s.series_description})
-               
         
         """
             
@@ -333,13 +337,8 @@ def infotodict(seqinfo):
         if ('FLAIR' in description or ('DA' in description and 'FL' in description)):
             info[flair].append(s.series_id)
             continue   
-                
-        info[extra].append({'item': s.series_id, 'acq': s.series_description})
+    
     """
     
-        
-        
 
     return info
-
-
