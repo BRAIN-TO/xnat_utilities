@@ -57,8 +57,7 @@ docker run -it --rm -v <bids_dir>:/data:ro -v <output_dir>:/out nipreps/mriqc:la
 ```
 
 ## fMRIPrep
-https://fmriprep.org/en/stable/ \
-[Our copy of 23.0.2 with FAQ](https://github.com/845127818virna/fmriprep)
+https://fmriprep.org/en/stable/
 
 1. Data have to be in BIDS. You can validate your data with the [validator](http://incf.github.io/bids-validator/). Normally, no error or warning should be present for fMRIPrep to run properly (otherwise use `--skip_bids_validation`).
 2. Run `docker pull nipreps/fmriprep:latest` to get the latest docker image or `docker pull nipreps/fmriprep:<version>`
