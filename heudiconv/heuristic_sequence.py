@@ -1,11 +1,12 @@
 import os
 
-#Intended for for fmaps
+# "Intended for" for fmaps
 POPULATE_INTENDED_FOR_OPTS = {
     'matching_parameters': ['Force'],
     'criterion': 'Closest'
 }
 
+# Files with these key words are skipped
 dicoms2skip = ['localiser','setter','localizer', 'Head Scout']
 
 def filter_dicom(dcmdata):

@@ -42,7 +42,7 @@ Method2 for a single subject using our heudiconv and converter file: (easier to 
 3. When you are in the base directory, use `chmod u+x heudiconv_test.sh` to make the script executable. Then you can run heudiconv_test.sh with two arguments: the name of the dicom directory and the subject index (e.g., `./heudiconv_test.sh Yuexin_project 01`). The output will be have "BIDS" as suffix (e.g., ./Yuexin_project_BIDS).
 
 ### heuristic files provided:
-- [heuristic_protocol.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_protocol.py): classification based on series description.
+- [heuristic_protocol.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_protocol.py): classification based on series description. (no longer updated)
 - [heuristic_sequence.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_sequence.py): classification based on sequence name. Users need to modify the output BOLD file name on their own by replacing "taskName" with the actual task. 
 - [heuristic_sequence_bold.py](https://github.com/BRAIN-TO/xnat_utilities/blob/main/heudiconv/heuristic_sequence_bold.py): classification based on sequence name. Users will be prompted to input the task name if fMRI data are present and the task will be in the output BOLD file name.
 
